@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-[
-    "Kegiatan Sekolah",
-    "Akademik",
-    "Ekstrakurikuler",
-    "Perayaan & Hari Besar",
-    "Prestasi & Penghargaan",
-    "Proyek P5 & Kurikulum Merdeka",
-    "Kegiatan Guru"
-]
-=======
 {
     "Kegiatan Sekolah": [
         "Upacara Bendera",
@@ -68,4 +57,3 @@
         "Seminar"
     ]
 }
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
