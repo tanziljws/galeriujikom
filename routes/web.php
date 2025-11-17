@@ -270,7 +270,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
 
     // Posts (Informasi) - CRUD via manifest.json
     Route::get('/posts', function () {
-<<<<<<< HEAD
         // Admin list: only show items created by admin (exclude seeded examples)
         $dir = public_path('uploads/informations');
         $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
@@ -415,7 +414,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         return redirect()->route('admin.posts.index')->with('status', $found ? 'Informasi berhasil dihapus.' : 'Informasi tidak ditemukan.');
     })->name('posts.destroy');
 
-<<<<<<< HEAD
     // Utility: Cleanup seeded informations (keep only admin-created entries)
     Route::get('/posts/cleanup', function () {
         $dir = public_path('uploads/informations');
@@ -459,7 +457,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
             'date' => ['required','date'],
             'place' => ['nullable','string','max:150'],
             'description' => ['nullable','string','max:1000'],
-<<<<<<< HEAD
         ]);
         Agenda::create([
             'title' => $validated['title'],
@@ -476,7 +473,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
             'date' => ['required','date'],
             'place' => ['nullable','string','max:150'],
             'description' => ['nullable','string','max:1000'],
-<<<<<<< HEAD
         ]);
         $item = Agenda::findOrFail($id);
         $item->title = $validated['title'];
@@ -736,8 +732,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         usort($items, function ($a, $b) { return strcmp($b['uploaded_at'] ?? '', $a['uploaded_at'] ?? ''); });
         return view('admin.gallery.index', ['items' => $items]);
     })->name('gallery.index');
-    
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
+
     // Gallery Categories Management
     Route::prefix('gallery/categories')->name('gallery.categories.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\GalleryCategoryController::class, 'index'])->name('index');
@@ -1235,7 +1230,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
 
     // Home settings -> redirect to Guru & Staf management
     Route::get('/home/edit', function () { return redirect()->route('admin.guru-staf.index'); })->name('home.edit');
-<<<<<<< HEAD
     
     // Manajemen Admin (hanya untuk role admin)
     Route::resource('users', \App\Http\Controllers\Admin\AdminUserController::class);
