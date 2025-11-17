@@ -45,7 +45,7 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="text-muted mb-1">Total Dislikes</h6>
-              <h3 class="mb-0">{{ array_sum(array_column(array_column($photoReports, 'stats'), 'dislikes')) }}</h3>
+              <h3 class="mb-0">{{ !empty($photoReports) ? array_sum(array_column(array_column($photoReports, 'stats'), 'dislikes')) : 0 }}</h3>
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="text-muted mb-1">Total Likes</h6>
-              <h3 class="mb-0">{{ array_sum(array_column(array_column($photoReports, 'stats'), 'likes')) }}</h3>
+              <h3 class="mb-0">{{ !empty($photoReports) ? array_sum(array_column(array_column($photoReports, 'stats'), 'likes')) : 0 }}</h3>
             </div>
           </div>
         </div>
@@ -99,7 +99,7 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="text-muted mb-1">Total Unduhan</h6>
-              <h3 class="mb-0">{{ array_sum(array_column(array_column($photoReports, 'stats'), 'downloads')) }}</h3>
+              <h3 class="mb-0">{{ !empty($photoReports) ? array_sum(array_column(array_column($photoReports, 'stats'), 'downloads')) : 0 }}</h3>
             </div>
           </div>
         </div>
@@ -190,11 +190,11 @@
         <i class="ri-star-line me-2"></i>Foto Paling Populer
       </h5>
       <div class="row g-3">
-        @forelse(array_slice($photoReports, 0, 6) as $report)
+        @forelse(!empty($photoReports) ? array_slice($photoReports, 0, 6) : [] as $report)
           @php
-            $photo = $report['photo'];
-            $stats = $report['stats'];
-            $url = $photo->filename ? asset('uploads/gallery/'.$photo->filename) : ($photo->image_path ? asset('storage/'.$photo->image_path) : '');
+            $photo = $report['photo'] ?? null;
+            $stats = $report['stats'] ?? ['likes' => 0, 'dislikes' => 0, 'downloads' => 0];
+            $url = ($photo && $photo->filename) ? asset('uploads/gallery/'.$photo->filename) : (($photo && $photo->image_path) ? asset('storage/'.$photo->image_path) : '');
           @endphp
           <div class="col-md-6 col-lg-4">
             <div class="card h-100 shadow-sm">
@@ -202,12 +202,12 @@
                 <img src="{{ $url }}" alt="{{ $photo->title }}" style="object-fit: cover;">
               </div>
               <div class="card-body">
-                <h6 class="card-title">{{ $photo->title }}</h6>
-                <p class="card-text text-muted small">{{ $photo->category }}</p>
+                <h6 class="card-title">{{ $photo->title ?? 'Tanpa Judul' }}</h6>
+                <p class="card-text text-muted small">{{ $photo->category ?? 'Lainnya' }}</p>
                 <div class="d-flex justify-content-between text-muted small">
-                  <span><i class="ri-heart-fill text-danger"></i> {{ $stats['likes'] }}</span>
-                  <span><i class="ri-dislike-fill text-warning"></i> {{ $stats['dislikes'] }}</span>
-                  <span><i class="ri-download-fill text-info"></i> {{ $stats['downloads'] }}</span>
+                  <span><i class="ri-heart-fill text-danger"></i> {{ $stats['likes'] ?? 0 }}</span>
+                  <span><i class="ri-dislike-fill text-warning"></i> {{ $stats['dislikes'] ?? 0 }}</span>
+                  <span><i class="ri-download-fill text-info"></i> {{ $stats['downloads'] ?? 0 }}</span>
                 </div>
               </div>
             </div>
