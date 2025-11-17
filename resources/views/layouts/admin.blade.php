@@ -184,15 +184,24 @@
     </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@motionone/dom/dist/motion.min.js"></script>
 <script>
-    // Motion hover animation for sidebar links
+    // Smooth hover animation for sidebar links (using native Web Animations API)
     document.querySelectorAll('.admin-menu a').forEach(el=>{
         el.addEventListener('mouseenter',()=>{
-            el.animate({ transform: ['translateX(0)','translateX(4px)']}, {duration:200, fill:'forwards', easing:'ease-out'});
+            if (el.animate) {
+                el.animate({ transform: ['translateX(0)','translateX(4px)']}, {duration:200, fill:'forwards', easing:'ease-out'});
+            } else {
+                el.style.transform = 'translateX(4px)';
+                el.style.transition = 'transform 0.2s ease-out';
+            }
         });
         el.addEventListener('mouseleave',()=>{
-            el.animate({ transform: ['translateX(4px)','translateX(0)']}, {duration:200, fill:'forwards', easing:'ease-in'});
+            if (el.animate) {
+                el.animate({ transform: ['translateX(4px)','translateX(0)']}, {duration:200, fill:'forwards', easing:'ease-in'});
+            } else {
+                el.style.transform = 'translateX(0)';
+                el.style.transition = 'transform 0.2s ease-in';
+            }
         });
     });
 </script>

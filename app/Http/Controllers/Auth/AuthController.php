@@ -33,12 +33,12 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|min:6',
-            'captcha' => 'required|numeric',
-            'captcha_answer' => 'required|numeric',
+            'captcha' => 'required',
+            'captcha_answer' => 'required',
         ]);
 
         // Validate CAPTCHA
-        if ($request->captcha != $request->captcha_answer) {
+        if ((int)$request->captcha != (int)$request->captcha_answer) {
             return back()->withErrors([
                 'captcha' => 'Jawaban CAPTCHA salah. Silakan coba lagi.',
             ])->withInput($request->only('email'));
@@ -69,8 +69,8 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
-            'captcha' => 'required|numeric',
-            'captcha_answer' => 'required|numeric',
+            'captcha' => 'required',
+            'captcha_answer' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -78,7 +78,7 @@ class AuthController extends Controller
         }
 
         // Validate CAPTCHA
-        if ($request->captcha != $request->captcha_answer) {
+        if ((int)$request->captcha != (int)$request->captcha_answer) {
             return back()->withErrors([
                 'captcha' => 'Jawaban CAPTCHA salah. Silakan coba lagi.',
             ])->withInput($request->except('password', 'password_confirmation'));

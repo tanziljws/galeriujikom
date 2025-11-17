@@ -740,88 +740,89 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         Route::put('/', [\App\Http\Controllers\Admin\GalleryCategoryController::class, 'update'])->name('rename');
         Route::delete('/', [\App\Http\Controllers\Admin\GalleryCategoryController::class, 'destroy'])->name('delete');
     });
-    // Gallery reporting
+    // Gallery reporting (DB-backed)
     Route::get('/gallery/report', function(){
-        $dir = public_path('uploads/gallery');
-        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $reactionsPath = $dir . DIRECTORY_SEPARATOR . 'reactions.json';
-        $commentsPath = $dir . DIRECTORY_SEPARATOR . 'comments.json';
-        $downloadsJsonPath = $dir . DIRECTORY_SEPARATOR . 'downloads.json';
-        $items = is_file($manifestPath) ? (json_decode(file_get_contents($manifestPath), true) ?: []) : [];
-        $reactions = is_file($reactionsPath) ? (json_decode(file_get_contents($reactionsPath), true) ?: []) : [];
-        $comments = is_file($commentsPath) ? (json_decode(file_get_contents($commentsPath), true) ?: []) : [];
-        $downloadsJson = is_file($downloadsJsonPath) ? (json_decode(file_get_contents($downloadsJsonPath), true) ?: []) : [];
-        $byFile = [];
-        foreach ($items as $it){ $byFile[$it['filename']] = $it; }
-        $summary = [];
-        foreach ($reactions as $r){
-            $f = $r['filename'] ?? null; if(!$f) continue;
-            $summary[$f] = $summary[$f] ?? ['likes'=>0,'dislikes'=>0,'comments'=>0];
-            $summary[$f]['likes'] = (int)($r['likes'] ?? 0);
-            $summary[$f]['dislikes'] = (int)($r['dislikes'] ?? 0);
-        }
-        foreach ($comments as $c){
-            $f = $c['filename'] ?? null; if(!$f) continue;
-            $summary[$f] = $summary[$f] ?? ['likes'=>0,'dislikes'=>0,'comments'=>0];
-            $summary[$f]['comments']++;
-        }
-        // Downloads from DB (if table exists) and JSON fallback
         try {
-            if (\Schema::hasTable('download_logs')) {
-                $byDb = DownloadLog::selectRaw('filename, COUNT(*) as c')
-                    ->whereNotNull('filename')
-                    ->groupBy('filename')
-                    ->pluck('c','filename')->toArray();
-                foreach ($byDb as $f=>$cnt){
-                    $summary[$f] = $summary[$f] ?? ['likes'=>0,'dislikes'=>0,'comments'=>0];
-                    $summary[$f]['downloads'] = ($summary[$f]['downloads'] ?? 0) + (int)$cnt;
-                }
+            // Get all gallery items from DB
+            $items = GalleryItem::whereNotNull('filename')->get();
+            
+            // Get reactions from DB
+            $reactions = \App\Models\PhotoReaction::selectRaw('photo_id, reaction, COUNT(*) as count')
+                ->groupBy('photo_id', 'reaction')
+                ->get()
+                ->groupBy('photo_id');
+            
+            // Get comments from DB
+            $comments = \App\Models\PhotoComment::where('status', 'approved')
+                ->selectRaw('photo_id, COUNT(*) as count')
+                ->groupBy('photo_id')
+                ->pluck('count', 'photo_id');
+            
+            // Get downloads from DB
+            $downloads = DownloadLog::selectRaw('photo_id, COUNT(*) as count')
+                ->whereNotNull('photo_id')
+                ->groupBy('photo_id')
+                ->pluck('count', 'photo_id');
+            
+            // Build summary
+            $summary = [];
+            foreach ($items as $item) {
+                $photoId = (string)$item->id;
+                $reactionsForPhoto = $reactions->get($photoId, collect());
+                $likes = $reactionsForPhoto->where('reaction', 'like')->sum('count');
+                $dislikes = $reactionsForPhoto->where('reaction', 'dislike')->sum('count');
+                
+                $summary[$photoId] = [
+                    'likes' => $likes,
+                    'dislikes' => $dislikes,
+                    'comments' => $comments->get($photoId, 0),
+                    'downloads' => $downloads->get($photoId, 0),
+                ];
             }
-        } catch (\Throwable $e) { /* ignore */ }
-        // also include JSON downloads (pre-DB)
-        foreach ($downloadsJson as $d){
-            $f = $d['filename'] ?? null; if(!$f) continue;
-            $summary[$f] = $summary[$f] ?? ['likes'=>0,'dislikes'=>0,'comments'=>0];
-            $summary[$f]['downloads'] = ($summary[$f]['downloads'] ?? 0) + 1;
+            
+            // Build rows
+            $rows = [];
+            foreach ($items as $item) {
+                $photoId = (string)$item->id;
+                $s = $summary[$photoId] ?? ['likes'=>0,'dislikes'=>0,'comments'=>0,'downloads'=>0];
+                $rows[] = [
+                    'id' => $item->id,
+                    'filename' => $item->filename,
+                    'title' => $item->title ?? 'Tanpa Judul',
+                    'category' => $item->category ?? 'Lainnya',
+                    'url' => $item->filename ? asset('uploads/gallery/'.$item->filename) : '',
+                    'likes' => $s['likes'],
+                    'dislikes' => $s['dislikes'],
+                    'comments' => $s['comments'],
+                    'downloads' => $s['downloads'],
+                    'score' => $s['likes'] - $s['dislikes']
+                ];
+            }
+            
+            usort($rows, function($a,$b){ 
+                return ($b['score'] <=> $a['score']) ?: ($b['likes'] <=> $a['likes']); 
+            });
+            
+            // Recent comments from DB
+            $recentComments = \App\Models\PhotoComment::with('user')
+                ->where('status', 'approved')
+                ->orderByDesc('created_at')
+                ->limit(20)
+                ->get()
+                ->map(function($c){
+                    return [
+                        'photo_id' => $c->photo_id,
+                        'user_name' => $c->user->name ?? 'Anonymous',
+                        'comment' => $c->comment,
+                        'created_at' => $c->created_at->toIso8601String(),
+                    ];
+                })->toArray();
+            
+            return view('admin.gallery.report', compact('rows','recentComments'));
+        } catch (\Exception $e) {
+            \Log::error('Gallery report error: ' . $e->getMessage());
+            return view('admin.gallery.report', ['rows' => [], 'recentComments' => []]);
         }
-        // Normalizer + umbrella grouping (same as public gallery)
-        $normalize = function($s){
-            $s = is_string($s) ? $s : '';
-            $s = preg_replace('/\s+/', ' ', trim($s));
-            $lower = mb_strtolower($s);
-            $title = implode(' ', array_map(function($w){ return mb_strtoupper(mb_substr($w,0,1)).mb_substr($w,1); }, explode(' ', $lower)));
-            return $title !== '' ? $title : 'Lainnya';
-        };
-        $groupOf = function($cat) use ($normalize){
-            $c = mb_strtolower($normalize($cat));
-            if (preg_match('/\b(prestasi|penghargaan|juara)\b/u', $c)) return 'Prestasi';
-            if (preg_match('/\b(jurusan|tkj|rpl|dkv|akuntansi|perhotelan|otomotif|mesin|kimia|farmasi)\b/u', $c)) return 'Jurusan';
-            if (preg_match('/\b(akademik|ujian|try\s*out|ulangan|penilaian)\b/u', $c)) return 'Akademik';
-            // Default -> Acara Sekolah
-            return 'Acara Sekolah';
-        };
-        // Build rows
-        $rows = [];
-        foreach ($summary as $f=>$s){
-            $item = $byFile[$f] ?? ['filename'=>$f,'title'=>$f,'category'=>'Lainnya','url'=>asset('uploads/gallery/'.$f)];
-            $groupCat = $groupOf($item['category'] ?? '');
-            $rows[] = [
-                'filename'=>$f,
-                'title'=>$item['title'] ?? $f,
-                'category'=>$groupCat,
-                'url'=>$item['url'] ?? asset('uploads/gallery/'.$f),
-                'likes'=>$s['likes'],
-                'dislikes'=>$s['dislikes'],
-                'comments'=>$s['comments'],
-                'downloads'=>(int)($s['downloads'] ?? 0),
-                'score'=>($s['likes'] - $s['dislikes'])
-            ];
-        }
-        usort($rows, function($a,$b){ return ($b['score'] <=> $a['score']) ?: ($b['likes'] <=> $a['likes']); });
-        // Recent comments
-        usort($comments, function($a,$b){ return strcmp($b['created_at'] ?? '', $a['created_at'] ?? ''); });
-        $recentComments = array_slice($comments, 0, 20);
-        return view('admin.gallery.report', compact('rows','recentComments'));
     })->name('gallery.report');
 
     // Export PDF of gallery report
