@@ -9,6 +9,7 @@ use App\Models\GalleryItem;
 use App\Models\PhotoReaction;
 use App\Models\DownloadLog;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
@@ -50,7 +51,7 @@ class ReportController extends Controller
             // Get reactions - with full error handling
             $reactionsByPhoto = [];
             try {
-                if (class_exists(PhotoReaction::class) && \Schema::hasTable('photo_reactions')) {
+                if (class_exists(PhotoReaction::class) && Schema::hasTable('photo_reactions')) {
                     $reactionsData = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
                         ->groupBy('photo_id', 'reaction')
                         ->get();
@@ -75,7 +76,7 @@ class ReportController extends Controller
             // Get downloads - with full error handling
             $downloadsByPhoto = [];
             try {
-                if (class_exists(DownloadLog::class) && \Schema::hasTable('download_logs')) {
+                if (class_exists(DownloadLog::class) && Schema::hasTable('download_logs')) {
                     $downloadsData = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
                         ->groupBy('photo_id')
                         ->get();
@@ -234,7 +235,7 @@ class ReportController extends Controller
             // Get reactions
             $reactionsByPhoto = [];
             try {
-                if (\Schema::hasTable('photo_reactions')) {
+                if (Schema::hasTable('photo_reactions')) {
                     $reactionsData = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
                         ->groupBy('photo_id', 'reaction')
                         ->get();
@@ -259,7 +260,7 @@ class ReportController extends Controller
             // Get downloads
             $downloadsByPhoto = [];
             try {
-                if (\Schema::hasTable('download_logs')) {
+                if (Schema::hasTable('download_logs')) {
                     $downloadsData = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
                         ->groupBy('photo_id')
                         ->get();
