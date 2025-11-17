@@ -6,11 +6,7 @@
     <title>@yield('title', 'SMKN 4 BOGOR')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-<<<<<<< HEAD
     <link href="{{ asset('css/dashboard.css') }}?v={{ time() }}" rel="stylesheet">
-=======
-    <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @stack('styles')
     <style>
@@ -71,10 +67,6 @@
             border-radius: 50px !important;
             padding: 0.5rem 1.25rem !important;
         }
-=======
-        /* Make navbar glass and sticky feel */
-        .glass-nav{ background: rgba(14,42,71,.65)!important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.18); }
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         /* Cards on public pages become semi-transparent */
         .main-content-wrapper .dashboard-card, .main-content-wrapper .card{
             background: rgba(255,255,255,.78);
