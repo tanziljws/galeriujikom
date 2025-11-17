@@ -109,18 +109,19 @@ class ReportController extends Controller
             });
             
             return view('admin.reports.index', [
-                'totalUsers' => $totalUsers,
-                'recentUsers' => $recentUsers,
-                'photoReports' => $photoReports
+                'totalUsers' => $totalUsers ?? 0,
+                'recentUsers' => $recentUsers ?? collect(),
+                'photoReports' => $photoReports ?? []
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Reports index error: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
+            \Log::error('File: ' . $e->getFile() . ' Line: ' . $e->getLine());
             return view('admin.reports.index', [
                 'totalUsers' => 0,
                 'recentUsers' => collect(),
                 'photoReports' => []
-            ])->withErrors(['error' => 'Terjadi kesalahan saat memuat laporan.']);
+            ])->withErrors(['error' => 'Terjadi kesalahan saat memuat laporan: ' . $e->getMessage()]);
         }
     }
     
