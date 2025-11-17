@@ -166,11 +166,11 @@
             </tr>
           </thead>
           <tbody>
-            @forelse($recentUsers as $user)
+            @forelse(($recentUsers ?? collect()) as $user)
               <tr>
-                <td>{{ $user->name }}</td>
-                <td>{{ $user->email }}</td>
-                <td>{{ $user->created_at->format('d M Y, H:i') }}</td>
+                <td>{{ $user->name ?? '-' }}</td>
+                <td>{{ $user->email ?? '-' }}</td>
+                <td>{{ $user->created_at ? $user->created_at->format('d M Y, H:i') : '-' }}</td>
               </tr>
             @empty
               <tr>

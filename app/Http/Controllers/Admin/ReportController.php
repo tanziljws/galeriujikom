@@ -20,12 +20,24 @@ class ReportController extends Controller
     {
         try {
             // Get user statistics
-            $totalUsers = User::count();
-            $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get();
+            $totalUsers = 0;
+            $recentUsers = collect();
+            try {
+                $totalUsers = User::count();
+                $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get();
+            } catch (\Exception $e) {
+                \Log::error('Error fetching users: ' . $e->getMessage());
+            }
             
             // Get photo statistics from database - use more efficient query
-            $photos = GalleryItem::whereNotNull('filename')->limit(100)->get();
+            $photos = collect();
             $photoReports = [];
+            try {
+                $photos = GalleryItem::whereNotNull('filename')->limit(100)->get();
+            } catch (\Exception $e) {
+                \Log::error('Error fetching photos: ' . $e->getMessage());
+                $photos = collect();
+            }
             
             // Get all reactions grouped by photo_id for efficiency
             $reactionsByPhoto = [];
