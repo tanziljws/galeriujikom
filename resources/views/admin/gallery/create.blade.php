@@ -25,6 +25,7 @@
         @csrf
         <div class="row g-3">
             <div class="col-md-6">
+<<<<<<< HEAD
                 <label class="form-label">Judul Album</label>
                 <input type="text" name="title" class="form-control" placeholder="Misal: Pensi" required>
             </div>
@@ -51,6 +52,23 @@
 
                 <div id="previewGrid" class="row g-2 mt-2"></div>
                 <div class="mt-1 small"><strong>Total dipilih:</strong> <span id="countLabel">0</span>/15</div>
+=======
+                <label class="form-label">Judul (opsional, untuk semua foto)</label>
+                <input type="text" name="title" class="form-control" placeholder="Misal: Pensi">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Kategori</label>
+                <input type="text" name="category" class="form-control" placeholder="Misal: Transforkrab / Workshop Guru / Pensi" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Foto (maks. 50 file, total 200MB)</label>
+                <input type="file" name="images[]" class="form-control" accept="image/*" multiple required>
+                <small class="text-muted">Pilih hingga 50 foto. Total ukuran semua file tidak boleh melebihi 200MB.</small>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Keterangan (opsional, untuk semua foto)</label>
+                <input type="text" name="caption" class="form-control" placeholder="Keterangan foto">
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
             </div>
             
         </div>
@@ -64,6 +82,7 @@
       (function(){
         const form = document.getElementById('gallery-upload-form');
         if(!form) return;
+<<<<<<< HEAD
         const input = document.getElementById('photosInput');
         const addBtn = document.getElementById('addMoreBtn');
         const preview = document.getElementById('previewGrid');
@@ -161,6 +180,25 @@
           
           // Allow form to submit normally
           return true;
+=======
+        form.addEventListener('submit', function(ev){
+          const input = form.querySelector('input[name="images[]"]');
+          if(!input || !input.files) return;
+          const files = Array.from(input.files);
+          if(files.length > 50){
+            ev.preventDefault();
+            alert('Maksimal 50 foto sekaligus.');
+            return;
+          }
+          const total = files.reduce((s,f)=>s+f.size,0);
+          const maxTotal = 200 * 1024 * 1024; // 200MB total
+          if(total > maxTotal){
+            ev.preventDefault();
+            const mb = (total/1024/1024).toFixed(1);
+            alert('Total ukuran file '+mb+'MB melebihi batas 200MB. Kurangi jumlah atau kompres foto.');
+            return;
+          }
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         });
       })();
     </script>

@@ -58,6 +58,7 @@
 @endpush
 
 @section('content')
+<<<<<<< HEAD
 <div class="container-fluid px-4">
   <!-- Header Card -->
   <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: white !important;">
@@ -75,6 +76,17 @@
       </div>
     </div>
   </div>
+=======
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="mb-1">Kategori Galeri</h4>
+    <p class="text-muted mb-0">Kelola kategori untuk galeri foto</p>
+  </div>
+  <a href="{{ route('admin.gallery.index') }}" class="btn btn-outline-secondary">
+    <i class="ri-arrow-left-line me-1"></i> Kembali ke Galeri
+  </a>
+</div>
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 
 @if ($errors->any())
   <div class="alert alert-danger">
@@ -94,19 +106,33 @@
 @endif
 
 <!-- Card Tambah Kategori Baru -->
+<<<<<<< HEAD
 <div class="card border-0 shadow-sm rounded-4 mb-4">
   <div class="card-body p-4">
     <h5 class="mb-3" style="color: #3b6ea5; font-weight: 600;">Tambah Kategori Baru</h5>
+=======
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Tambah Kategori Baru</h5>
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
     <form method="POST" action="{{ route('admin.gallery.categories.store') }}" class="row g-3">
       @csrf
       <div class="col-md-8">
         <div class="input-group">
+<<<<<<< HEAD
           <span class="input-group-text bg-light"><i class="ri-add-line"></i></span>
+=======
+          <span class="input-group-text"><i class="ri-add-line"></i></span>
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
           <input type="text" name="name" class="form-control" placeholder="Masukkan nama kategori" required>
         </div>
       </div>
       <div class="col-md-4">
+<<<<<<< HEAD
         <button type="submit" class="btn btn-primary w-100 rounded-pill">
+=======
+        <button type="submit" class="btn btn-primary w-100">
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
           <i class="ri-add-circle-line me-1"></i> Tambah Kategori
         </button>
       </div>
@@ -114,7 +140,73 @@
   </div>
 </div>
 
+<<<<<<< HEAD
 
+=======
+<div class="dashboard-card mb-4 position-relative">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="mb-0">Kunjungan Saya</h5>
+    <small class="text-muted">Minggu ini</small>
+  </div>
+  <div class="d-flex align-items-center gap-4 flex-wrap">
+    <div class="text-center">
+      <div style="width:120px;height:120px" id="radial-struktur"></div>
+      <div class="small text-muted mt-1" id="cap-struktur"></div>
+    </div>
+    <div class="text-center">
+      <div style="width:120px;height:120px" id="radial-pemrograman"></div>
+      <div class="small text-muted mt-1" id="cap-pemrograman"></div>
+    </div>
+    <div class="text-center">
+      <div style="width:120px;height:120px" id="radial-database"></div>
+      <div class="small text-muted mt-1" id="cap-database"></div>
+    </div>
+  </div>
+  <a href="{{ route('admin.dashboard') }}" class="stretched-link" aria-label="Buka Dashboard"></a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+  function radial(selector, label, value){
+    new ApexCharts(document.querySelector(selector), {
+      chart:{ type:'radialBar', sparkline:{enabled:true}},
+      series:[value],
+      labels:[label],
+      plotOptions:{
+        radialBar:{
+          hollow:{ size:'60%' },
+          track:{ background:'#e9eef8' },
+          dataLabels:{
+            name:{ show:false },
+            value:{ formatter: function(v){ return Math.round(v)+'%'; } }
+          }
+        }
+      },
+      colors:['#3b82f6']
+    }).render();
+  }
+  const data = @json($radials ?? []);
+  const a = data[0] || {label:'Struktur', value:0, count:0};
+  const b = data[1] || {label:'Pemrograman', value:0, count:0};
+  const c = data[2] || {label:'Database', value:0, count:0};
+  // render charts
+  radial('#radial-struktur', a.label, a.value);
+  radial('#radial-pemrograman', b.label, b.value);
+  radial('#radial-database', c.label, c.value);
+  // append view counts under each chart for clarity
+  const addCount = (sel, cnt) => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    const info = document.createElement('div');
+    info.className = 'small text-muted text-center mt-1';
+    info.textContent = `views (${cnt||0})`;
+    el.insertAdjacentElement('afterend', info);
+  };
+  addCount('#radial-struktur', a.count);
+  addCount('#radial-pemrograman', b.count);
+  addCount('#radial-database', c.count);
+  </script>
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 
 <!-- Card Daftar Kategori -->
 <div class="card">
@@ -151,6 +243,7 @@
               </td>
               <td class="text-end">
                 <div class="btn-group" role="group">
+<<<<<<< HEAD
                   <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailCategory{{ $i }}">
                     <i class="ri-eye-line"></i> Detail
                   </button>
@@ -226,6 +319,16 @@
                   </div>
                 </div>
                 
+=======
+                  <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCategory{{ $i }}">
+                    <i class="ri-edit-line"></i> Edit
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteCategory{{ $i }}">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>
+                </div>
+                
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 <!-- Modal Edit -->
                 <div class="modal fade" id="editCategory{{ $i }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
                   <div class="modal-dialog">
@@ -296,8 +399,11 @@
     @endif
   </div>
 </div>
+<<<<<<< HEAD
 
 </div>
+=======
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 @endsection
 
 @push('scripts')

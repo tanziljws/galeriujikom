@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [
     "Kegiatan Sekolah",
     "Akademik",
@@ -7,3 +8,64 @@
     "Proyek P5 & Kurikulum Merdeka",
     "Kegiatan Guru"
 ]
+=======
+{
+    "Kegiatan Sekolah": [
+        "Upacara Bendera",
+        "Kegiatan OSIS",
+        "Kegiatan Pramuka",
+        "Porseni"
+    ],
+    "Akademik": [
+        "Pembelajaran di Kelas",
+        "Ujian & Evaluasi",
+        "Praktikum",
+        "Karya Ilmiah"
+    ],
+    "Ekstrakurikuler": [
+        "Pramuka",
+        "Paskibra",
+        "PMR",
+        "Pencak Silat",
+        "Bola Voli",
+        "Bulu Tangkis",
+        "Tari Tradisional",
+        "Teater"
+    ],
+    "Perayaan & Hari Besar": [
+        "Hari Kemerdekaan",
+        "Maulid Nabi",
+        "Hari Guru",
+        "Hari Kartini"
+    ],
+    "Kunjungan & Study Tour": [
+        "Kunjungan Industri",
+        "Study Banding",
+        "Field Trip"
+    ],
+    "Prestasi & Penghargaan": [
+        "Olimpiade",
+        "Lomba Akademik",
+        "Lomba Non-Akademik",
+        "Penghargaan Guru"
+    ],
+    "Proyek P5 / Kurikulum Merdeka": [
+        "Proyek 1",
+        "Proyek 2",
+        "Proyek 3",
+        "Proyek 4"
+    ],
+    "Sarana & Prasarana": [
+        "Laboratorium",
+        "Perpustakaan",
+        "Lapangan Olahraga",
+        "Ruang Kelas"
+    ],
+    "Kegiatan Guru": [
+        "Workshop",
+        "MGMP",
+        "In House Training",
+        "Seminar"
+    ]
+}
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b

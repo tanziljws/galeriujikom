@@ -9,7 +9,11 @@
     },
     {
         "title": "Workshop Guru",
+<<<<<<< HEAD
         "category": "Kegiatan Guru & Staf",
+=======
+        "category": "Kegiatan Guru",
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         "caption": "",
         "filename": "img_68d0ee8895197_WhatsApp_Image_2025-09-22_at_13.25.23.jpeg",
         "url": "http://127.0.0.1:8000/uploads/gallery/img_68d0ee8895197_WhatsApp_Image_2025-09-22_at_13.25.23.jpeg",
@@ -17,7 +21,11 @@
     },
     {
         "title": "Workshop Guru",
+<<<<<<< HEAD
         "category": "Kegiatan Guru & Staf",
+=======
+        "category": "Kegiatan Guru",
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         "caption": "",
         "filename": "img_68d0ef377a0c5_WhatsApp_Image_2025-09-22_at_13.25.18__1_.jpeg",
         "url": "http://127.0.0.1:8000/uploads/gallery/img_68d0ef377a0c5_WhatsApp_Image_2025-09-22_at_13.25.18__1_.jpeg",
@@ -814,7 +822,11 @@
     },
     {
         "title": "Kapolsek",
+<<<<<<< HEAD
         "category": "Kegiatan Sekolah",
+=======
+        "category": "Akademik",
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         "caption": "",
         "filename": "img_68e891cb97fd3_WhatsApp_Image_2025-10-10_at_11.17.35.jpeg",
         "url": "http://127.0.0.1:8000/uploads/gallery/img_68e891cb97fd3_WhatsApp_Image_2025-10-10_at_11.17.35.jpeg",
@@ -829,6 +841,7 @@
         "url": "http://127.0.0.1:8000/uploads/gallery/img_68f21de92df2a_kapolsek.jpeg",
         "uploaded_at": "2025-10-17T10:43:53+00:00",
         "created_by": "admin"
+<<<<<<< HEAD
     },
     {
         "title": "Kapolsek",
@@ -883,5 +896,7 @@
         "url": "http://127.0.0.1:8000/uploads/gallery/img_68fc4e2c43c03_kapol_5.jpeg",
         "uploaded_at": "2025-10-25T11:12:28+07:00",
         "created_by": "admin"
+=======
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
     }
 ]

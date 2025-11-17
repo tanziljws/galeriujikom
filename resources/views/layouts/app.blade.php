@@ -6,7 +6,11 @@
     <title>@yield('title', 'SMKN 4 BOGOR')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<<<<<<< HEAD
     <link href="{{ asset('css/dashboard.css') }}?v={{ time() }}" rel="stylesheet">
+=======
+    <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @stack('styles')
     <style>
@@ -18,6 +22,7 @@
         /* Glass helpers */
         .glass { background: rgba(255,255,255,.10); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border:1px solid rgba(255,255,255,.18); }
         .glass-soft { background: rgba(255,255,255,.08); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,.14); }
+<<<<<<< HEAD
         /* Make navbar glass and sticky feel with rounded corners (floating capsule) */
         .glass-nav{ 
             background: rgba(14,42,71,.65)!important; 
@@ -66,6 +71,10 @@
             border-radius: 50px !important;
             padding: 0.5rem 1.25rem !important;
         }
+=======
+        /* Make navbar glass and sticky feel */
+        .glass-nav{ background: rgba(14,42,71,.65)!important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.18); }
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         /* Cards on public pages become semi-transparent */
         .main-content-wrapper .dashboard-card, .main-content-wrapper .card{
             background: rgba(255,255,255,.78);
@@ -114,6 +123,7 @@
                             <i class="fas fa-calendar-alt me-1"></i>Agenda
                         </a>
                     </li>
+<<<<<<< HEAD
                     
                     @auth
                         <li class="nav-item dropdown">
@@ -145,6 +155,8 @@
                             </a>
                         </li>
                     @endauth
+=======
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 </ul>
             </div>
         </div>

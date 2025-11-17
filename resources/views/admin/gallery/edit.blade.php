@@ -20,10 +20,14 @@
             <div class="col-md-6">
                 <label class="form-label">Kategori</label>
                 <select name="category" class="form-select" required>
+<<<<<<< HEAD
                     @php
                         $categoriesPath = resource_path('data/umbrella_categories.json');
                         $cats = file_exists($categoriesPath) ? json_decode(file_get_contents($categoriesPath), true) : [];
                     @endphp
+=======
+                    @php($cats=['Pensi','Lomba Kemerdekaan','Classmeet','P5','Moontour','Transforkrab','Workshop Guru','Ekstrakurikuler','Prestasi & Penghargaan','Lainnya'])
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                     @foreach($cats as $cat)
                         <option value="{{ $cat }}" {{ ($item['category'] ?? '') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
                     @endforeach

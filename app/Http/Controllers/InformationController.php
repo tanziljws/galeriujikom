@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+<<<<<<< HEAD
 use App\Models\Information;
 use Illuminate\Support\Facades\Auth;
+=======
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 
 class InformationController extends Controller
 {
@@ -175,6 +178,7 @@ class InformationController extends Controller
 
     public function index(Request $request)
     {
+<<<<<<< HEAD
         // Ambil informasi dari DB (terbaru berdasarkan created_at)
         $items = Information::orderByDesc('created_at')->limit(10)->get();
         // Map ke struktur yang dipakai view publik saat ini
@@ -199,11 +203,58 @@ class InformationController extends Controller
             ['title' => 'Alumni Sukses','value' => '5,000+','icon' => '🏆','color' => 'bg-yellow-100 text-yellow-800'],
         ];
 
+=======
+        // Read admin-managed informations from manifest
+        $dir = public_path('uploads/informations');
+        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
+        $managed = is_file($manifestPath) ? (json_decode(file_get_contents($manifestPath), true) ?: []) : [];
+        // Seed fallback (can be removed later if not needed)
+        $seeds = $this->getInformations();
+        // Merge: managed first, then seeds
+        $informations = array_merge($managed, $seeds);
+
+        // Data statistik sekolah
+        $stats = [
+            [
+                'title' => 'Total Siswa',
+                'value' => '1,250',
+                'icon' => '👥',
+                'color' => 'bg-blue-100 text-blue-800'
+            ],
+            [
+                'title' => 'Jurusan',
+                'value' => '4',
+                'icon' => '🎓',
+                'color' => 'bg-green-100 text-green-800'
+            ],
+            [
+                'title' => 'Guru & Staff',
+                'value' => '85',
+                'icon' => '👨‍🏫',
+                'color' => 'bg-purple-100 text-purple-800'
+            ],
+            [
+                'title' => 'Alumni Sukses',
+                'value' => '5,000+',
+                'icon' => '🏆',
+                'color' => 'bg-yellow-100 text-yellow-800'
+            ]
+        ];
+
+        // Convert array to collection for easier filtering and sort by date desc
+        // LIMIT: tampilkan maksimal 10 informasi di halaman publik
+        $informations = collect($informations)
+            ->sortByDesc(function($it){ return $it['date'] ?? '1970-01-01'; })
+            ->take(10)
+            ->values();
+
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         return view('information', compact('informations', 'stats'));
     }
 
     public function show($id)
     {
+<<<<<<< HEAD
         $it = Information::findOrFail($id);
         $item = [
             'id' => $it->id,
@@ -230,10 +281,35 @@ class InformationController extends Controller
                 ];
             });
         return view('information-detail', [ 'info' => $item, 'related' => $related ]);
+=======
+        // Find in managed + seeds
+        $dir = public_path('uploads/informations');
+        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
+        $managed = is_file($manifestPath) ? (json_decode(file_get_contents($manifestPath), true) ?: []) : [];
+        $informations = collect(array_merge($managed, $this->getInformations()));
+        $item = $informations->first(function($it) use ($id){ return (string)($it['id'] ?? '') === (string)$id; });
+
+        if (!$item) {
+            abort(404);
+        }
+
+        // informasi terkait (misal 3 item lain)
+        $related = collect($informations)
+            ->where('id', '!=', (int) $id)
+            ->where('category', $item['category'])
+            ->take(3)
+            ->values();
+
+        return view('information-detail', [
+            'info' => $item,
+            'related' => $related,
+        ]);
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
     }
 
     public function store(Request $request)
     {
+<<<<<<< HEAD
         $validated = $request->validate([
             'title' => 'required|string|max:200',
             'description' => 'required|string|max:500',
@@ -266,6 +342,28 @@ class InformationController extends Controller
             'image_path' => $imagePath,
             'created_by' => Auth::guard('petugas')->id(),
         ]);
+=======
+        $data = $request->validate([
+            'title' => 'required|string|max:200',
+            'description' => 'required|string|max:500',
+            'content' => 'nullable|string',
+            'date' => 'required|date',
+            'category' => 'required|string|max:50',
+            'image' => 'nullable|url',
+        ]);
+
+        // Fallbacks
+        if (empty($data['image'])) {
+            $data['image'] = 'https://via.placeholder.com/400x250/7A9CC6/FFFFFF?text=Informasi';
+        }
+        $data['is_featured'] = false;
+        $data['id'] = (int) (microtime(true) * 1000); // simple unique id
+
+        // Prepend to session array so it appears first
+        $items = $request->session()->get('information_diary', []);
+        array_unshift($items, $data);
+        $request->session()->put('information_diary', $items);
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 
         return redirect()->route('information')->with('success', 'Informasi berhasil ditambahkan.');
     }

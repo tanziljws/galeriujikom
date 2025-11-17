@@ -4,6 +4,7 @@
 
 @push('styles')
 <style>
+<<<<<<< HEAD
     /* Category Filter Buttons */
     .btn-outline-secondary {
         color: #1E3A8A !important;
@@ -20,6 +21,8 @@
         font-weight: 600 !important;
     }
     
+=======
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
     .gallery-actions {
         display: flex;
         justify-content: space-between;
@@ -136,15 +139,24 @@
 @endpush
 
 @section('content')
+<<<<<<< HEAD
     <section class="section-fullscreen mb-4 section-alt py-3">
         <div class="container section-soft accented decor-gradient-top">
             <div class="text-center py-3">
                 <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 50px; height: 50px; background-color: #1E3A8A;">
                     <i class="fas fa-images" style="font-size: 1.25rem; color: white;"></i>
+=======
+    <section class="section-fullscreen mb-3 section-alt py-2" style="margin-top:0;">
+        <div class="container section-soft accented decor-gradient-top py-2 py-md-3">
+            <div class="gallery-hero text-center mb-4 mb-md-3">
+                <div class="icon-wrap">
+                    <i class="fas fa-images"></i>
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 </div>
                 <h1 class="vm-title-center">Galeri Foto Sekolah</h1>
                 <p class="vm-subtitle mb-0">Jelajahi berbagai momen berharga dan kegiatan sekolah kami</p>
             </div>
+<<<<<<< HEAD
         </div>
     </section>
 
@@ -187,6 +199,110 @@
                         </div>
                     @endif
                         
+=======
+
+            <!-- Filter Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="filter-section">
+                        <h2 class="section-title mb-4">Galeri Foto</h2>
+                        
+                        <!-- Category Tabs -->
+                        <div class="category-tabs mb-4">
+                            @php
+                                $umbrellaCategories = json_decode(file_get_contents(resource_path('data/umbrella_categories.json')), true);
+                                $activeCategory = request('category');
+                                
+                                // Get all subcategories in a flat array
+                                $allSubcategories = [];
+                                foreach ($umbrellaCategories as $subcategories) {
+                                    $allSubcategories = array_merge($allSubcategories, $subcategories);
+                                }
+                                
+                                // Check if active category is a subcategory
+                                $isSubcategoryActive = in_array($activeCategory, $allSubcategories);
+                                $activeUmbrella = '';
+                                
+                                // Find which umbrella the active subcategory belongs to
+                                if ($isSubcategoryActive) {
+                                    foreach ($umbrellaCategories as $umbrella => $subcats) {
+                                        if (in_array($activeCategory, $subcats)) {
+                                            $activeUmbrella = $umbrella;
+                                            break;
+                                        }
+                                    }
+                                }
+                            @endphp
+                            
+                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                <!-- All Button -->
+                                <button type="button" 
+                                        class="filter-tab {{ !$activeCategory ? 'active' : '' }}"
+                                        data-category="">
+                                    Semua
+                                </button>
+                                
+                                <!-- Umbrella Categories -->
+                                @foreach($umbrellaCategories as $umbrella => $subcategories)
+                                    <div class="dropdown category-dropdown">
+                                        <button class="filter-tab dropdown-toggle {{ ($activeUmbrella === $umbrella || (!$isSubcategoryActive && $activeCategory === $umbrella)) ? 'active' : '' }}" 
+                                                type="button" 
+                                                id="dropdown-{{ Str::slug($umbrella) }}"
+                                                data-bs-toggle="dropdown" 
+                                                aria-expanded="false"
+                                                data-category="{{ $umbrella }}">
+                                            {{ $umbrella }}
+                                            <i class="fas fa-chevron-down ms-2"></i>
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdown-{{ Str::slug($umbrella) }}">
+                                            @foreach($subcategories as $subcategory)
+                                                <li>
+                                                    <a class="dropdown-item subcategory-item {{ $activeCategory === $subcategory ? 'active' : '' }}" 
+                                                       href="#" 
+                                                       data-category="{{ $subcategory }}">
+                                                        {{ $subcategory }}
+                                                        @if($activeCategory === $subcategory)
+                                                            <i class="fas fa-check ms-2"></i>
+                                                        @endif
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endforeach
+                            </div>
+                            
+                            <!-- Active Category Indicator -->
+                            @if($activeCategory)
+                                <div class="active-category-indicator mt-3">
+                                    <span class="badge bg-primary">
+                                        {{ $activeCategory }}
+                                        <button class="btn-close-category" aria-label="Hapus filter">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
+                        
+                        <!-- Sort and Search -->
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" class="form-control" placeholder="Cari foto..." id="searchInput">
+                            </div>
+                            
+                            <div class="sort-dropdown">
+                                <select class="form-select" id="sortBy">
+                                    <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Terbaru</option>
+                                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Terlama</option>
+                                    <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>Paling Populer</option>
+                                </select>
+                                <i class="fas fa-sort"></i>
+                            </div>
+                        </div>
+                    </div>
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 </div>
             </div>
             
@@ -251,6 +367,52 @@
                     box-shadow: 0 4px 12px rgba(26, 86, 219, 0.2);
                 }
                 
+<<<<<<< HEAD
+=======
+                .filter-tab .fa-chevron-down {
+                    font-size: 0.7rem;
+                    margin-left: 0.5rem;
+                    transition: transform 0.2s;
+                }
+                
+                .filter-tab[aria-expanded="true"] .fa-chevron-down {
+                    transform: rotate(180deg);
+                }
+                
+                /* Dropdown Menu */
+                .dropdown-menu {
+                    border: none;
+                    border-radius: 12px;
+                    padding: 0.5rem;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                    margin-top: 0.5rem;
+                    min-width: 220px;
+                    border: 1px solid #E5E7EB;
+                }
+                
+                .dropdown-item {
+                    padding: 0.6rem 1rem;
+                    border-radius: 8px;
+                    font-size: 0.9rem;
+                    color: #4B5563;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    transition: all 0.2s;
+                }
+                
+                .dropdown-item:hover, .dropdown-item:focus {
+                    background: #F3F4F6;
+                    color: #1A56DB;
+                }
+                
+                .dropdown-item.active {
+                    background: #EFF6FF;
+                    color: #1A56DB;
+                    font-weight: 500;
+                }
+                
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 /* Active Category Badge */
                 .active-category-indicator .badge {
                     display: inline-flex;
@@ -357,7 +519,10 @@
                         max-width: 100%;
                     }
                 }
+<<<<<<< HEAD
                 
+=======
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
             </style>
 
             <!-- Gallery Grid -->
@@ -375,13 +540,18 @@
                 /* Container Utama */
                 .gallery-container {
                     display: grid;
+<<<<<<< HEAD
                     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+=======
+                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                     gap: 24px;
                     padding: 24px 0;
                 }
                 
                 /* Item Galeri */
                 .gallery-item {
+<<<<<<< HEAD
                     display: block !important;
                     background: rgba(255, 255, 255, 0.75) !important;
                     backdrop-filter: blur(15px) !important;
@@ -441,10 +611,59 @@
                     font-weight: 600;
                     z-index: 2;
                     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+=======
+                    position: relative;
+                    border-radius: 16px;
+                    overflow: hidden;
+                    cursor: pointer;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    aspect-ratio: 1;
+                    background: var(--light-gray);
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                    border: 1px solid rgba(0, 0, 0, 0.05);
+                }
+                
+                .gallery-item:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                }
+                
+                .gallery-item img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                
+                .gallery-item:hover img {
+                    transform: scale(1.08);
+                }
+                
+                /* Overlay */
+                .gallery-item .overlay {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: linear-gradient(to top, var(--dark-overlay) 0%, transparent 100%);
+                    padding: 24px 20px 20px;
+                    color: white;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-end;
+                    height: 100%;
+                }
+                
+                .gallery-item:hover .overlay {
+                    opacity: 1;
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 }
                 
                 /* Teks */
                 .gallery-item .title {
+<<<<<<< HEAD
                     font-weight: 700;
                     margin-bottom: 8px;
                     font-size: 1.1rem;
@@ -469,11 +688,57 @@
                     font-size: 0.85rem;
                     color: #6B7280;
                     font-weight: 500;
+=======
+                    font-weight: 600;
+                    margin-bottom: 6px;
+                    font-size: 1.2rem;
+                    line-height: 1.3;
+                    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+                }
+                
+                .gallery-item .date {
+                    font-size: 0.9rem;
+                    opacity: 0.9;
+                    color: rgba(255, 255, 255, 0.9);
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                     display: flex;
                     align-items: center;
                     gap: 6px;
                 }
                 
+<<<<<<< HEAD
+=======
+                .gallery-item .date:before {
+                    content: '\f073'; /* Font Awesome calendar icon */
+                    font-family: 'Font Awesome 5 Free';
+                    font-weight: 400;
+                    font-size: 0.8em;
+                }
+                
+                /* Badge Kategori */
+                .gallery-item .category-badge {
+                    position: absolute;
+                    top: 16px;
+                    right: 16px;
+                    background: var(--accent-color);
+                    color: white;
+                    padding: 6px 12px;
+                    border-radius: 20px;
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    opacity: 0;
+                    transform: translateY(10px);
+                    transition: all 0.3s ease;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+                }
+                
+                .gallery-item:hover .category-badge {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 
                 .gallery-card::before {
                     content: '';
@@ -566,6 +831,7 @@
                 .gallery-card:nth-child(2) { animation-delay: 0.2s; }
                 .gallery-card:nth-child(3) { animation-delay: 0.3s; }
                 .gallery-card:nth-child(4) { animation-delay: 0.4s; }
+<<<<<<< HEAD
                 
                 /* Modal Image Container */
                 .modal-image-container {
@@ -589,6 +855,8 @@
                 #photoModal .modal-content {
                     background: rgba(255, 255, 255, 0.98);
                 }
+=======
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
             </style>
 
             <div class="gallery-container" id="galleryGrid">
@@ -646,6 +914,7 @@
                     ];
                     
                     // Gunakan data asli jika tersedia, jika tidak gunakan data contoh
+<<<<<<< HEAD
                     $displayItems = !empty($albums) ? $albums : $sampleItems;
                 @endphp
                 
@@ -657,12 +926,27 @@
                         $photoCount = $album['photo_count'] ?? 1;
                         $date = isset($album['uploaded_at']) ? \Carbon\Carbon::parse($album['uploaded_at'])->format('d F Y') : ($album['date'] ?? now()->format('d F Y'));
                         $category = $album['category'] ?? 'Umum';
+=======
+                    $displayItems = !empty($items) ? $items : $sampleItems;
+                @endphp
+                
+                @foreach($displayItems as $item)
+                    @php
+                        $item = (array)$item;
+                        $image = $item['image'] ?? ($item['url'] ?? 'https://via.placeholder.com/500x500?text=Galeri+SMKN+4');
+                        $title = $item['title'] ?? 'Tanpa Judul';
+                        $date = $item['date'] ?? ($item['uploaded_at'] ?? now()->format('d F Y'));
+                        $category = $item['category'] ?? 'Umum';
+                        $views = $item['views'] ?? '0';
+                        $likes = $item['likes'] ?? '0';
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                         
                         // Warna acak untuk badge kategori
                         $badgeColors = ['#E74694', '#3F83F8', '#1A56DB', '#0694A2', '#0E9F6E', '#D03801'];
                         $randomColor = $badgeColors[array_rand($badgeColors)];
                     @endphp
                     
+<<<<<<< HEAD
                     <a href="{{ route('gallery.album', urlencode($title)) }}" class="gallery-item" data-category="{{ Str::slug($category) }}" style="text-decoration: none; color: inherit; background: rgba(255, 255, 255, 0.75) !important; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); border-radius: 20px; overflow: hidden; display: block;">
                         <div class="img-wrapper">
                             <div class="category-badge">
@@ -687,10 +971,78 @@
                 @if(empty($displayItems) && empty($albums))
                     <div class="col-12">
                         <div class="alert alert-info">Belum ada album yang tersedia.</div>
+=======
+                    <div class="gallery-item" data-category="{{ Str::slug($category) }}">
+                        <img src="{{ $image }}" alt="{{ $title }}" loading="lazy">
+                        <div class="overlay">
+                            <div class="category-badge" style="background: {{ $randomColor }}">
+                                {{ $category }}
+                            </div>
+                            <div class="title">{{ $title }}</div>
+                            <div class="date">
+                                <i class="far fa-calendar-alt me-1"></i> {{ $date }}
+                            </div>
+                            <div class="d-flex align-items-center mt-2">
+                                <span class="me-3">
+                                    <i class="far fa-eye me-1"></i> {{ $views }}
+                                </span>
+                                <span>
+                                    <i class="far fa-heart me-1"></i> {{ $likes }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+                
+                @if(empty($displayItems) && empty($items))
+                    <div class="col-12">
+                        <div class="alert alert-info">Belum ada foto yang tersedia.</div>
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                     </div>
                 @endif
             </div>
 
+<<<<<<< HEAD
+=======
+            <!-- Pagination -->
+            @if(isset($items) && is_array($items) && count($items) > 0)
+                @php
+                    // Jika menggunakan pagination Laravel, gunakan kode ini:
+                    // {{-- {{ $items->links() }} --}}
+                    
+                    // Atau buat pagination manual sederhana
+                    $currentPage = request('page', 1);
+                    $itemsPerPage = 12; // Sesuaikan dengan jumlah item per halaman
+                    $totalPages = ceil(count($items) / $itemsPerPage);
+                @endphp
+                
+                @if($totalPages > 1)
+                    <div class="mt-4">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
+                                    <a class="page-link" href="{{ request()->fullUrlWithQuery(['page' => $currentPage - 1]) }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo; Sebelumnya</span>
+                                    </a>
+                                </li>
+                                
+                                @for($i = 1; $i <= $totalPages; $i++)
+                                    <li class="page-item {{ $i == $currentPage ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ request()->fullUrlWithQuery(['page' => $i]) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
+                                
+                                <li class="page-item {{ $currentPage >= $totalPages ? 'disabled' : '' }}">
+                                    <a class="page-link" href="{{ request()->fullUrlWithQuery(['page' => $currentPage + 1]) }}" aria-label="Next">
+                                        <span aria-hidden="true">Selanjutnya &raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                @endif
+            @endif
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         </div>
     </section>
 
@@ -705,7 +1057,11 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-8">
+<<<<<<< HEAD
                             <div class="modal-image-container mb-3">
+=======
+                            <div class="ratio ratio-16x9 mb-3">
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                                 <img id="modalImage" src="" alt="" class="img-fluid rounded">
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1202,12 +1558,48 @@
                 }
             });
             
+<<<<<<< HEAD
             // Handle category filter button clicks
             document.querySelectorAll('button[data-category]').forEach(btn => {
+=======
+            // Handle category selection
+            const categoryBtns = document.querySelectorAll('.category-btn, .subcategory-item');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const activeCategoryDisplay = document.getElementById('activeCategory');
+            const applyFilterBtn = document.getElementById('applyFilter');
+            
+            // Initialize active state
+            const activeCategory = '{{ request('category') }}';
+            if (activeCategory) {
+                // Find and activate the corresponding button
+                categoryBtns.forEach(btn => {
+                    if (btn.dataset.category === activeCategory) {
+                        btn.classList.add('active');
+                        if (btn.classList.contains('dropdown-item')) {
+                            // If it's a subcategory, also activate its parent dropdown
+                            const dropdown = btn.closest('.dropdown');
+                            if (dropdown) {
+                                const dropdownBtn = dropdown.querySelector('.dropdown-toggle');
+                                if (dropdownBtn) {
+                                    dropdownBtn.classList.add('active');
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Activate 'Semua' button if no category is selected
+                document.querySelector('.category-btn[data-category=""]')?.classList.add('active');
+            }
+            
+            // Handle category button clicks
+            categoryBtns.forEach(btn => {
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const selectedCategory = this.dataset.category;
                     
+<<<<<<< HEAD
                     // Build URL with query parameters
                     const url = new URL(window.location.href.split('?')[0]);
                     if (selectedCategory) {
@@ -1252,11 +1644,53 @@
                 if (sortBy && sortBy !== 'latest') {
                     url.searchParams.set('sort', sortBy);
                 }
+=======
+                    // Update active states
+                    document.querySelectorAll('.category-btn, .subcategory-item').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                    
+                    if (selectedCategory === '') {
+                        // 'Semua' category selected
+                        document.querySelector('.category-btn[data-category=""]').classList.add('active');
+                        categoryFilter.value = '';
+                        activeCategoryDisplay.innerHTML = '';
+                    } else if (this.classList.contains('dropdown-toggle')) {
+                        // Main category selected
+                        this.classList.add('active');
+                        categoryFilter.value = selectedCategory;
+                        activeCategoryDisplay.innerHTML = `Kategori aktif: <span class="text-primary">${selectedCategory}</span>`;
+                    } else {
+                        // Subcategory selected
+                        this.classList.add('active');
+                        const parentDropdown = this.closest('.dropdown');
+                        if (parentDropdown) {
+                            parentDropdown.querySelector('.dropdown-toggle').classList.add('active');
+                        }
+                        categoryFilter.value = selectedCategory;
+                        activeCategoryDisplay.innerHTML = `Kategori aktif: <span class="text-primary">${selectedCategory}</span>`;
+                    }
+                });
+            });
+            
+            // Apply filter button
+            applyFilterBtn.addEventListener('click', function() {
+                const category = categoryFilter.value;
+                const sortBy = document.getElementById('sortBy').value;
+                
+                // Build URL with query parameters
+                const url = new URL(window.location.href.split('?')[0]);
+                if (category) url.searchParams.set('category', category);
+                else url.searchParams.delete('category');
+                
+                if (sortBy) url.searchParams.set('sort', sortBy);
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 
                 window.location.href = url.toString();
             });
             
             // Handle sort change
+<<<<<<< HEAD
             document.getElementById('sortBy')?.addEventListener('change', function() {
                 const url = new URL(window.location.href.split('?')[0]);
                 
@@ -1306,6 +1740,43 @@
                 }
             });
             // Gallery items are now links to album pages, no need for click handlers
+=======
+            document.getElementById('sortBy').addEventListener('change', function() {
+                applyFilterBtn.click();
+            });
+            // Current photo ID for interactions
+            let currentPhotoId = null;
+            
+            // Handle gallery item click
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Get photo data from data attributes
+                    const photoId = this.getAttribute('data-id');
+                    const imageUrl = this.getAttribute('data-image');
+                    const title = this.getAttribute('data-title');
+                    const likes = this.getAttribute('data-likes');
+                    const dislikes = this.getAttribute('data-dislikes');
+                    const commentsCount = this.getAttribute('data-comments');
+                    
+                    // Update modal with photo data
+                    document.getElementById('modalImage').src = imageUrl;
+                    document.getElementById('modalTitle').textContent = title;
+                    document.getElementById('likeCount').textContent = likes;
+                    document.getElementById('dislikeCount').textContent = dislikes;
+                    document.getElementById('commentsCount').textContent = commentsCount;
+                    document.getElementById('commentPhotoId').value = photoId;
+                    document.getElementById('downloadPhotoId').value = photoId;
+                    
+                    // Store current photo ID
+                    currentPhotoId = photoId;
+                    
+                    // Load comments for this photo
+                    loadComments(photoId);
+                });
+            });
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
             
             // Handle like/dislike buttons
             document.querySelectorAll('.like-btn, .dislike-btn').forEach(button => {
@@ -1415,6 +1886,23 @@
                 // window.location.href = `/photos/${photoId}/download?name=${encodeURIComponent(formData.get('name'))}&email=${encodeURIComponent(formData.get('email'))}&purpose=${encodeURIComponent(formData.get('purpose'))}`;
             });
             
+<<<<<<< HEAD
+=======
+            // Handle filter form submission
+            document.getElementById('applyFilter')?.addEventListener('click', function() {
+                const category = document.getElementById('categoryFilter').value;
+                const sortBy = document.getElementById('sortBy').value;
+                
+                // Build the query string
+                const params = new URLSearchParams();
+                if (category) params.append('category', category);
+                if (sortBy) params.append('sort', sortBy);
+                
+                // Reload the page with the new filters
+                window.location.href = `${window.location.pathname}?${params.toString()}`;
+            });
+            
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
             // Load comments for a photo
             function loadComments(photoId) {
                 fetch(`/gallery/comments/${photoId}`)

@@ -7,7 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+<<<<<<< HEAD
 use App\Models\GalleryItem;
+=======
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 
 class GalleryCategoryController extends Controller
 {
@@ -16,9 +19,14 @@ class GalleryCategoryController extends Controller
 
     public function __construct()
     {
+<<<<<<< HEAD
         // Gunakan file yang sama dengan publik
         $this->categoriesPath = resource_path('data/umbrella_categories.json');
         $this->umbrellaCategoriesPath = resource_path('data/umbrella_categories.json');
+=======
+        $this->categoriesPath = storage_path('app/categories.json');
+        $this->umbrellaCategoriesPath = storage_path('app/umbrella_categories.json');
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         
         // Create files if they don't exist
         $this->initializeFiles();
@@ -26,6 +34,7 @@ class GalleryCategoryController extends Controller
     
     protected function initializeFiles()
     {
+<<<<<<< HEAD
         // Buat direktori data jika belum ada
         $dataDir = resource_path('data');
         if (!is_dir($dataDir)) {
@@ -46,6 +55,14 @@ class GalleryCategoryController extends Controller
                 "Kegiatan Guru & Staf"
             ];
             file_put_contents($this->categoriesPath, json_encode($defaultCategories, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+=======
+        if (!file_exists($this->categoriesPath)) {
+            file_put_contents($this->categoriesPath, json_encode([], JSON_PRETTY_PRINT));
+        }
+        
+        if (!file_exists($this->umbrellaCategoriesPath)) {
+            file_put_contents($this->umbrellaCategoriesPath, json_encode([], JSON_PRETTY_PRINT));
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         }
     }
 
@@ -128,10 +145,32 @@ class GalleryCategoryController extends Controller
             $categories = $this->getCategories();
             $umbrellaCategories = $this->getUmbrellaCategories();
             
+<<<<<<< HEAD
             // Count photos per category from DB
             $photosByCategory = [];
             foreach ($categories as $category) {
                 $photosByCategory[$category] = GalleryItem::where('category', $category)->count();
+=======
+            // Count photos per category
+            $galleryManifestPath = public_path('uploads/gallery/manifest.json');
+            $photosByCategory = [];
+            
+            if (file_exists($galleryManifestPath)) {
+                $photos = json_decode(file_get_contents($galleryManifestPath), true) ?: [];
+                
+                // Initialize all categories with count 0
+                foreach ($categories as $category) {
+                    $photosByCategory[$category] = 0;
+                }
+                
+                // Count photos per category
+                foreach ($photos as $photo) {
+                    $category = $photo['category'] ?? 'Lainnya';
+                    if (isset($photosByCategory[$category])) {
+                        $photosByCategory[$category]++;
+                    }
+                }
+>>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
             }
             
             return view('admin.gallery.categories', [
