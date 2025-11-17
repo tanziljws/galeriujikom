@@ -646,43 +646,43 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
 
     Route::post('/gallery', function(Request $request){
         try {
-        $validated = $request->validate([
-            'title' => ['required','string','max:150'],
-            'category' => ['nullable','string','max:100'],
-            // Naikkan batas ukuran per foto menjadi 25MB agar tidak sering gagal
-            'photos.*' => ['nullable','image','mimes:jpeg,png,jpg,webp,gif','max:25600'],
-        ]);
-        $title = $validated['title'];
-        $category = $validated['category'] ?? null;
-        $uploadedBy = Auth::guard('petugas')->id();
+            $validated = $request->validate([
+                'title' => ['required','string','max:150'],
+                'category' => ['nullable','string','max:100'],
+                // Naikkan batas ukuran per foto menjadi 25MB agar tidak sering gagal
+                'photos.*' => ['nullable','image','mimes:jpeg,png,jpg,webp,gif','max:25600'],
+            ]);
+            $title = $validated['title'];
+            $category = $validated['category'] ?? null;
+            $uploadedBy = Auth::guard('petugas')->id();
 
-        $dir = public_path('uploads/gallery');
+            $dir = public_path('uploads/gallery');
             if (!is_dir($dir)) { 
                 mkdir($dir,0755,true); 
             }
 
-        $files = $request->file('photos', []);
+            $files = $request->file('photos', []);
             if (empty($files) || count($files) === 0) {
                 return back()->withErrors(['photos' => 'Silakan pilih minimal 1 foto'])->withInput();
             }
             
-        if (count($files) > 15) {
-            return back()->withErrors(['photos' => 'Maksimal 15 foto per album'])->withInput();
-        }
+            if (count($files) > 15) {
+                return back()->withErrors(['photos' => 'Maksimal 15 foto per album'])->withInput();
+            }
 
             $uploadedCount = 0;
-        foreach ($files as $file) {
+            foreach ($files as $file) {
                 if (!$file || !$file->isValid()) continue;
                 try {
-            $safe = preg_replace('/[^A-Za-z0-9_\.-]/','_', $file->getClientOriginalName());
-            $filename = uniqid('gal_')."_".$safe;
-            $file->move($dir, $filename);
-            \App\Models\GalleryItem::create([
-                'title' => $title,
-                'category' => $category,
-                'filename' => $filename,
-                'uploaded_by' => $uploadedBy,
-            ]);
+                    $safe = preg_replace('/[^A-Za-z0-9_\.-]/','_', $file->getClientOriginalName());
+                    $filename = uniqid('gal_')."_".$safe;
+                    $file->move($dir, $filename);
+                    \App\Models\GalleryItem::create([
+                        'title' => $title,
+                        'category' => $category,
+                        'filename' => $filename,
+                        'uploaded_by' => $uploadedBy,
+                    ]);
                     $uploadedCount++;
                 } catch (\Exception $e) {
                     \Log::error('Error uploading file: ' . $e->getMessage());

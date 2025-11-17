@@ -18,47 +18,62 @@ class ReportController extends Controller
      */
     public function index()
     {
-        // Get user statistics
-        $totalUsers = User::count();
-        $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get();
-        
-        // Get photo statistics from database
-        $photos = GalleryItem::all();
-        $photoReports = [];
-        
-        foreach ($photos as $photo) {
-            $likes = PhotoReaction::where('photo_id', $photo->id)
-                ->where('reaction', 'like')
-                ->count();
+        try {
+            // Get user statistics
+            $totalUsers = User::count();
+            $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get();
             
-            $dislikes = PhotoReaction::where('photo_id', $photo->id)
-                ->where('reaction', 'dislike')
-                ->count();
+            // Get photo statistics from database
+            $photos = GalleryItem::whereNotNull('filename')->get();
+            $photoReports = [];
             
-            $downloads = DownloadLog::where('photo_id', $photo->id)->count();
+            foreach ($photos as $photo) {
+                try {
+                    $likes = PhotoReaction::where('photo_id', (string)$photo->id)
+                        ->where('reaction', 'like')
+                        ->count();
+                    
+                    $dislikes = PhotoReaction::where('photo_id', (string)$photo->id)
+                        ->where('reaction', 'dislike')
+                        ->count();
+                    
+                    $downloads = DownloadLog::where('photo_id', (string)$photo->id)->count();
+                    
+                    $photoReports[] = [
+                        'photo' => $photo,
+                        'stats' => [
+                            'likes' => $likes,
+                            'dislikes' => $dislikes,
+                            'downloads' => $downloads
+                        ]
+                    ];
+                } catch (\Exception $e) {
+                    \Log::error('Error processing photo stats: ' . $e->getMessage());
+                    continue;
+                }
+            }
             
-            $photoReports[] = [
-                'photo' => $photo,
-                'stats' => [
-                    'likes' => $likes,
-                    'dislikes' => $dislikes,
-                    'downloads' => $downloads
-                ]
-            ];
+            // Sort by total interactions (likes + dislikes + downloads)
+            usort($photoReports, function($a, $b) {
+                $totalA = $a['stats']['likes'] + $a['stats']['dislikes'] + $a['stats']['downloads'];
+                $totalB = $b['stats']['likes'] + $b['stats']['dislikes'] + $b['stats']['downloads'];
+                return $totalB - $totalA;
+            });
+            
+            return view('admin.reports.index', [
+                'totalUsers' => $totalUsers,
+                'recentUsers' => $recentUsers,
+                'photoReports' => $photoReports
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Reports index error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return view('admin.reports.index', [
+                'totalUsers' => 0,
+                'recentUsers' => [],
+                'photoReports' => []
+            ]);
         }
-        
-        // Sort by total interactions (likes + dislikes + downloads)
-        usort($photoReports, function($a, $b) {
-            $totalA = $a['stats']['likes'] + $a['stats']['dislikes'] + $a['stats']['downloads'];
-            $totalB = $b['stats']['likes'] + $b['stats']['dislikes'] + $b['stats']['downloads'];
-            return $totalB - $totalA;
-        });
-        
-        return view('admin.reports.index', [
-            'totalUsers' => $totalUsers,
-            'recentUsers' => $recentUsers,
-            'photoReports' => $photoReports
-        ]);
     }
     
     /**
@@ -111,34 +126,47 @@ class ReportController extends Controller
      */
     public function photos()
     {
-        // Get all photos with stats from database
-        $photoReports = [];
-        $allPhotos = GalleryItem::orderBy('created_at', 'desc')->get();
-        
-        foreach ($allPhotos as $photo) {
-            $likes = PhotoReaction::where('photo_id', $photo->id)
-                ->where('reaction', 'like')
-                ->count();
+        try {
+            // Get all photos with stats from database
+            $photoReports = [];
+            $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get();
             
-            $dislikes = PhotoReaction::where('photo_id', $photo->id)
-                ->where('reaction', 'dislike')
-                ->count();
+            foreach ($allPhotos as $photo) {
+                try {
+                    $likes = PhotoReaction::where('photo_id', (string)$photo->id)
+                        ->where('reaction', 'like')
+                        ->count();
+                    
+                    $dislikes = PhotoReaction::where('photo_id', (string)$photo->id)
+                        ->where('reaction', 'dislike')
+                        ->count();
+                    
+                    $downloads = DownloadLog::where('photo_id', (string)$photo->id)->count();
+                    
+                    $photoReports[] = [
+                        'photo' => $photo,
+                        'stats' => [
+                            'likes' => $likes,
+                            'dislikes' => $dislikes,
+                            'downloads' => $downloads
+                        ]
+                    ];
+                } catch (\Exception $e) {
+                    \Log::error('Error processing photo stats: ' . $e->getMessage());
+                    continue;
+                }
+            }
             
-            $downloads = DownloadLog::where('photo_id', $photo->id)->count();
-            
-            $photoReports[] = [
-                'photo' => $photo,
-                'stats' => [
-                    'likes' => $likes,
-                    'dislikes' => $dislikes,
-                    'downloads' => $downloads
-                ]
-            ];
+            return view('admin.reports.photos', [
+                'photoReports' => $photoReports
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Reports photos error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return view('admin.reports.photos', [
+                'photoReports' => []
+            ]);
         }
-        
-        return view('admin.reports.photos', [
-            'photoReports' => $photoReports
-        ]);
     }
     
     /**
@@ -146,14 +174,23 @@ class ReportController extends Controller
      */
     public function exportUsersPdf()
     {
-        $users = User::orderBy('created_at', 'desc')->get();
-        
-        $pdf = Pdf::loadView('admin.reports.pdf.users', [
-            'users' => $users,
-            'generatedAt' => now()->format('d F Y H:i')
-        ]);
-        
-        return $pdf->download('laporan-pengguna-' . date('Y-m-d') . '.pdf');
+        try {
+            $users = User::orderBy('created_at', 'desc')->get();
+            
+            if (class_exists('Barryvdh\DomPDF\Facade\Pdf')) {
+                $pdf = Pdf::loadView('admin.reports.pdf.users', [
+                    'users' => $users,
+                    'generatedAt' => now()->format('d F Y H:i')
+                ]);
+                
+                return $pdf->download('laporan-pengguna-' . date('Y-m-d') . '.pdf');
+            } else {
+                return back()->with('error', 'PDF library tidak tersedia. Silakan install dompdf.');
+            }
+        } catch (\Exception $e) {
+            \Log::error('Export users PDF error: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengekspor PDF: ' . $e->getMessage());
+        }
     }
     
     /**
@@ -161,36 +198,50 @@ class ReportController extends Controller
      */
     public function exportPhotosPdf()
     {
-        // Get photos with stats from database
-        $photoReports = [];
-        $allPhotos = GalleryItem::orderBy('created_at', 'desc')->get();
-        
-        foreach ($allPhotos as $photo) {
-            $likes = PhotoReaction::where('photo_id', $photo->id)
-                ->where('reaction', 'like')
-                ->count();
+        try {
+            // Get photos with stats from database
+            $photoReports = [];
+            $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get();
             
-            $dislikes = PhotoReaction::where('photo_id', $photo->id)
-                ->where('reaction', 'dislike')
-                ->count();
+            foreach ($allPhotos as $photo) {
+                try {
+                    $likes = PhotoReaction::where('photo_id', (string)$photo->id)
+                        ->where('reaction', 'like')
+                        ->count();
+                    
+                    $dislikes = PhotoReaction::where('photo_id', (string)$photo->id)
+                        ->where('reaction', 'dislike')
+                        ->count();
+                    
+                    $downloads = DownloadLog::where('photo_id', (string)$photo->id)->count();
+                    
+                    $photoReports[] = [
+                        'photo' => $photo,
+                        'stats' => [
+                            'likes' => $likes,
+                            'dislikes' => $dislikes,
+                            'downloads' => $downloads
+                        ]
+                    ];
+                } catch (\Exception $e) {
+                    \Log::error('Error processing photo stats: ' . $e->getMessage());
+                    continue;
+                }
+            }
             
-            $downloads = DownloadLog::where('photo_id', $photo->id)->count();
-            
-            $photoReports[] = [
-                'photo' => $photo,
-                'stats' => [
-                    'likes' => $likes,
-                    'dislikes' => $dislikes,
-                    'downloads' => $downloads
-                ]
-            ];
+            if (class_exists('Barryvdh\DomPDF\Facade\Pdf')) {
+                $pdf = Pdf::loadView('admin.reports.pdf.photos', [
+                    'photoReports' => $photoReports,
+                    'generatedAt' => now()->format('d F Y H:i')
+                ])->setPaper('a4', 'landscape');
+                
+                return $pdf->download('laporan-foto-galeri-' . date('Y-m-d') . '.pdf');
+            } else {
+                return back()->with('error', 'PDF library tidak tersedia. Silakan install dompdf.');
+            }
+        } catch (\Exception $e) {
+            \Log::error('Export photos PDF error: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengekspor PDF: ' . $e->getMessage());
         }
-        
-        $pdf = Pdf::loadView('admin.reports.pdf.photos', [
-            'photoReports' => $photoReports,
-            'generatedAt' => now()->format('d F Y H:i')
-        ])->setPaper('a4', 'landscape');
-        
-        return $pdf->download('laporan-foto-galeri-' . date('Y-m-d') . '.pdf');
     }
 }
