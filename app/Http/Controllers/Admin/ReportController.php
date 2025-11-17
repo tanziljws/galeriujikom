@@ -38,12 +38,12 @@ class ReportController extends Controller
                 $recentUsers = [];
             }
             
-            // Get photos
+            // Get photos - keep as objects for view compatibility
             $photos = [];
             try {
-                $photos = GalleryItem::whereNotNull('filename')->limit(100)->get()->toArray();
+                $photos = GalleryItem::whereNotNull('filename')->limit(100)->get();
             } catch (\Exception $e) {
-                $photos = [];
+                $photos = collect();
             }
             
             // Get reactions - simplified query
@@ -82,25 +82,30 @@ class ReportController extends Controller
             }
             
             // Process photos
-            foreach ($photos as $photo) {
-                try {
-                    $photoId = (string)($photo['id'] ?? $photo->id ?? '');
-                    if (!$photoId) continue;
-                    
-                    $likes = (int)($reactionsByPhoto[$photoId]['like'] ?? 0);
-                    $dislikes = (int)($reactionsByPhoto[$photoId]['dislike'] ?? 0);
-                    $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
-                    
-                    $photoReports[] = [
-                        'photo' => is_array($photo) ? (object)$photo : $photo,
-                        'stats' => [
-                            'likes' => $likes,
-                            'dislikes' => $dislikes,
-                            'downloads' => $downloads
-                        ]
-                    ];
-                } catch (\Exception $e) {
-                    continue;
+            if ($photos && method_exists($photos, 'count') && $photos->count() > 0) {
+                foreach ($photos as $photo) {
+                    try {
+                        if (!$photo || !isset($photo->id)) {
+                            continue;
+                        }
+                        
+                        $photoId = (string)$photo->id;
+                        
+                        $likes = (int)($reactionsByPhoto[$photoId]['like'] ?? 0);
+                        $dislikes = (int)($reactionsByPhoto[$photoId]['dislike'] ?? 0);
+                        $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
+                        
+                        $photoReports[] = [
+                            'photo' => $photo,
+                            'stats' => [
+                                'likes' => $likes,
+                                'dislikes' => $dislikes,
+                                'downloads' => $downloads
+                            ]
+                        ];
+                    } catch (\Exception $e) {
+                        continue;
+                    }
                 }
             }
             
