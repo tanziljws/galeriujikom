@@ -55,60 +55,60 @@ Route::get('/gallery/comments/{photoId}', [GalleryController::class, 'getComment
 Route::post('/gallery/react', [GalleryController::class, 'reactToPhoto'])->middleware('auth')->name('gallery.react');
 Route::post('/gallery/comment', [GalleryController::class, 'addComment'])->middleware('auth')->name('gallery.comment');
 
-// Gallery download
-Route::get('/gallery/download', function (Request $request) {
-    $request->validate([
-        'photo_id' => 'required|string',
-        'filename' => 'required|string'
-    ]);
-    
-    // Get the filename directly
-    $filename = $request->input('filename');
-    
-    // Get file path (assuming photos are in public/uploads/gallery)
-    $filePath = public_path('uploads/gallery/' . $filename);
-    
-    // Check if file exists
-    if (!file_exists($filePath)) {
-        abort(404, 'File tidak ditemukan');
-    }
-    
-    // Get file extension and set proper MIME type
-    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-    $mimeTypes = [
-        'jpg' => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'png' => 'image/png',
-        'gif' => 'image/gif',
-        'webp' => 'image/webp',
-    ];
-    
-    $mimeType = $mimeTypes[$extension] ?? 'image/jpeg';
-    
-    // Log the download
-    if (class_exists(DownloadLogController::class)) {
-        try {
-            app(DownloadLogController::class)->store($request);
-        } catch (\Exception $e) {
-            // Ignore log errors
+    // Gallery download
+    Route::get('/gallery/download', function (Request $request) {
+        $request->validate([
+            'photo_id' => 'required|string',
+            'filename' => 'required|string'
+        ]);
+        
+        // Get the filename directly
+        $filename = $request->input('filename');
+        
+        // Get file path (assuming photos are in public/uploads/gallery)
+        $filePath = public_path('uploads/gallery/' . $filename);
+        
+        // Check if file exists
+        if (!file_exists($filePath)) {
+            abort(404, 'File tidak ditemukan');
         }
-    }
-    
-    // Clean filename for download (remove prefix)
-    $cleanFilename = preg_replace('/^img_[a-f0-9]+_/i', '', $filename);
-    
-    // Return file with proper headers
-    return response()->file($filePath, [
-        'Content-Type' => $mimeType,
-        'Content-Disposition' => 'attachment; filename="' . $cleanFilename . '"',
-        'Cache-Control' => 'no-cache, no-store, must-revalidate',
-        'Pragma' => 'no-cache',
-        'Expires' => '0'
-    ]);
-})->name('gallery.download');
+        
+        // Get file extension and set proper MIME type
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+        ];
+        
+        $mimeType = $mimeTypes[$extension] ?? 'image/jpeg';
+        
+        // Log the download
+        if (class_exists(DownloadLogController::class)) {
+            try {
+                app(DownloadLogController::class)->store($request);
+            } catch (\Exception $e) {
+                // Ignore log errors
+            }
+        }
+        
+        // Clean filename for download (remove prefix)
+        $cleanFilename = preg_replace('/^img_[a-f0-9]+_/i', '', $filename);
+        
+        // Return file with proper headers
+        return response()->file($filePath, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'attachment; filename="' . $cleanFilename . '"',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0'
+        ]);
+    })->name('gallery.download');
 
-// Gallery download log -> controller (simpan ke DB)
-Route::post('/gallery/download-log', [DownloadLogController::class, 'store'])->name('gallery.download_log');
+    // Gallery download log -> controller (simpan ke DB)
+    Route::post('/gallery/download-log', [DownloadLogController::class, 'store'])->name('gallery.download_log');
 
 // Guru & Staf (public)
 Route::get('/guru-staf', function () {
@@ -613,15 +613,17 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
 
     // Gallery (Admin) using DB
     Route::get('/gallery', function(){
+        try {
         $items = \App\Models\GalleryItem::query()
-            ->select(['title','category', \DB::raw('MAX(created_at) as latest_at'), \DB::raw('COUNT(*) as photo_count')])
+                ->select(['title','category', \Illuminate\Support\Facades\DB::raw('MAX(created_at) as latest_at'), \Illuminate\Support\Facades\DB::raw('COUNT(*) as photo_count')])
+                ->whereNotNull('filename')
             ->groupBy('title','category')
             ->orderByDesc('latest_at')
             ->get();
         // Build array compatible with current admin view index
         $mapped = $items->map(function($g){
             // pick one thumbnail
-            $thumb = \App\Models\GalleryItem::where('title',$g->title)->latest('created_at')->first();
+                $thumb = \App\Models\GalleryItem::where('title',$g->title)->whereNotNull('filename')->latest('created_at')->first();
             $url = $thumb? ($thumb->filename ? asset('uploads/gallery/'.$thumb->filename) : '') : '';
             return [
                 'filename' => urlencode($g->title), // used as identifier in routes
@@ -633,11 +635,16 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
             ];
         })->toArray();
         return view('admin.gallery.index', ['items' => $mapped]);
+        } catch (\Exception $e) {
+            \Log::error('Admin gallery index error: ' . $e->getMessage());
+            return view('admin.gallery.index', ['items' => []]);
+        }
     })->name('gallery.index');
 
     Route::view('/gallery/create', 'admin.gallery.create')->name('gallery.create');
 
     Route::post('/gallery', function(Request $request){
+        try {
         $validated = $request->validate([
             'title' => ['required','string','max:150'],
             'category' => ['nullable','string','max:100'],
@@ -649,15 +656,23 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         $uploadedBy = Auth::guard('petugas')->id();
 
         $dir = public_path('uploads/gallery');
-        if (!is_dir($dir)) { mkdir($dir,0755,true); }
+            if (!is_dir($dir)) { 
+                mkdir($dir,0755,true); 
+            }
 
         $files = $request->file('photos', []);
+            if (empty($files) || count($files) === 0) {
+                return back()->withErrors(['photos' => 'Silakan pilih minimal 1 foto'])->withInput();
+            }
+            
         if (count($files) > 15) {
             return back()->withErrors(['photos' => 'Maksimal 15 foto per album'])->withInput();
         }
 
+            $uploadedCount = 0;
         foreach ($files as $file) {
-            if (!$file) continue;
+                if (!$file || !$file->isValid()) continue;
+                try {
             $safe = preg_replace('/[^A-Za-z0-9_\.-]/','_', $file->getClientOriginalName());
             $filename = uniqid('gal_')."_".$safe;
             $file->move($dir, $filename);
@@ -667,9 +682,25 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
                 'filename' => $filename,
                 'uploaded_by' => $uploadedBy,
             ]);
+                    $uploadedCount++;
+                } catch (\Exception $e) {
+                    \Log::error('Error uploading file: ' . $e->getMessage());
+                    continue;
+                }
+            }
+            
+            if ($uploadedCount === 0) {
+                return back()->withErrors(['photos' => 'Gagal mengupload foto. Pastikan file valid dan tidak melebihi 25MB per file.'])->withInput();
+            }
+            
+            return redirect()->route('admin.gallery.index')->with('status','Album berhasil dibuat/ditambah foto. (' . $uploadedCount . ' foto)');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Gallery upload error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return back()->withErrors(['error' => 'Terjadi kesalahan saat mengupload foto: ' . $e->getMessage()])->withInput();
         }
-        // URL input removed: only file uploads are supported
-        return redirect()->route('admin.gallery.index')->with('status','Album berhasil dibuat/ditambah foto.');
     })->name('gallery.store');
 
     Route::get('/gallery/album/{title}', function($title){
@@ -732,7 +763,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         usort($items, function ($a, $b) { return strcmp($b['uploaded_at'] ?? '', $a['uploaded_at'] ?? ''); });
         return view('admin.gallery.index', ['items' => $items]);
     })->name('gallery.index');
-
+    
     // Gallery Categories Management
     Route::prefix('gallery/categories')->name('gallery.categories.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\GalleryCategoryController::class, 'index'])->name('index');
@@ -765,7 +796,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
                 ->pluck('count', 'photo_id');
             
             // Build summary
-            $summary = [];
+        $summary = [];
             foreach ($items as $item) {
                 $photoId = (string)$item->id;
                 $reactionsForPhoto = $reactions->get($photoId, collect());
@@ -780,12 +811,12 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
                 ];
             }
             
-            // Build rows
-            $rows = [];
+        // Build rows
+        $rows = [];
             foreach ($items as $item) {
                 $photoId = (string)$item->id;
                 $s = $summary[$photoId] ?? ['likes'=>0,'dislikes'=>0,'comments'=>0,'downloads'=>0];
-                $rows[] = [
+            $rows[] = [
                     'id' => $item->id,
                     'filename' => $item->filename,
                     'title' => $item->title ?? 'Tanpa Judul',
@@ -818,7 +849,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
                     ];
                 })->toArray();
             
-            return view('admin.gallery.report', compact('rows','recentComments'));
+        return view('admin.gallery.report', compact('rows','recentComments'));
         } catch (\Exception $e) {
             \Log::error('Gallery report error: ' . $e->getMessage());
             return view('admin.gallery.report', ['rows' => [], 'recentComments' => []]);

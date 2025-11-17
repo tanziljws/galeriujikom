@@ -186,16 +186,18 @@
                         <hr>
                         <h6 class="mb-3">Foto dalam kategori ini:</h6>
                         @php
-                          $manifestPath = public_path('uploads/gallery/manifest.json');
-                          $categoryPhotos = [];
-                          if (file_exists($manifestPath)) {
-                            $allPhotos = json_decode(file_get_contents($manifestPath), true) ?: [];
-                            foreach ($allPhotos as $photo) {
-                              if (($photo['category'] ?? '') === $category) {
-                                $categoryPhotos[] = $photo;
-                              }
-                            }
-                          }
+                          // Get photos from database
+                          $categoryPhotos = \App\Models\GalleryItem::where('category', $category)
+                              ->whereNotNull('filename')
+                              ->orderByDesc('created_at')
+                              ->limit(12)
+                              ->get()
+                              ->map(function($item) {
+                                  return [
+                                      'title' => $item->title ?? 'Tanpa Judul',
+                                      'url' => $item->filename ? asset('uploads/gallery/'.$item->filename) : '',
+                                  ];
+                              })->toArray();
                         @endphp
                         
                         @if(count($categoryPhotos) > 0)

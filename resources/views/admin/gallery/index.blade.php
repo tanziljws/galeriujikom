@@ -7,10 +7,8 @@
           <h2 class="vm-title-center mb-1">Kelola Galeri</h2>
           <div class="vm-subtitle">Unggah, ubah, dan hapus foto galeri sekolah</div>
       </div>
-      <div class="ms-3 d-none d-md-block d-flex flex-column gap-2">
+      <div class="ms-3 d-none d-md-block">
           <a href="{{ route('admin.gallery.create') }}" class="btn btn-primary">+ Upload Foto</a>
-          <a href="{{ route('admin.gallery.report') }}" class="btn btn-outline-secondary"><i class="fa fa-chart-bar me-1"></i> Laporan Interaksi</a>
-          <a href="{{ route('admin.gallery.comments', ['status' => 'pending']) }}" class="btn btn-outline-primary"><i class="ri-chat-3-line me-1"></i> Moderasi Komentar</a>
       </div>
     </div>
   </div>

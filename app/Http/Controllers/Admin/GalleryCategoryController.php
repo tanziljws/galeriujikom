@@ -125,23 +125,58 @@ class GalleryCategoryController extends Controller
     public function index()
     {
         try {
-            $categories = $this->getCategories();
             $umbrellaCategories = $this->getUmbrellaCategories();
+            
+            // Handle both flat array and nested structure
+            $allCategories = [];
+            if (is_array($umbrellaCategories)) {
+                // Check if it's an associative array (object) or indexed array
+                if (array_keys($umbrellaCategories) !== range(0, count($umbrellaCategories) - 1)) {
+                    // It's an object/associative array (umbrella categories structure)
+                    // Get all subcategories
+                    foreach ($umbrellaCategories as $umbrella => $subcats) {
+                        if (is_array($subcats)) {
+                            $allCategories = array_merge($allCategories, $subcats);
+                        }
+                    }
+                } else {
+                    // It's a flat indexed array
+                    $allCategories = $umbrellaCategories;
+                }
+            }
             
             // Count photos per category from DB
             $photosByCategory = [];
-            foreach ($categories as $category) {
-                $photosByCategory[$category] = GalleryItem::where('category', $category)->count();
+            // Count for umbrella categories (keys)
+            if (is_array($umbrellaCategories) && array_keys($umbrellaCategories) !== range(0, count($umbrellaCategories) - 1)) {
+                foreach (array_keys($umbrellaCategories) as $umbrella) {
+                    $photosByCategory[$umbrella] = GalleryItem::where('category', $umbrella)->count();
+                }
+                // Also count for subcategories
+                foreach ($allCategories as $subcat) {
+                    if (!isset($photosByCategory[$subcat])) {
+                        $photosByCategory[$subcat] = GalleryItem::where('category', $subcat)->count();
+                    }
+                }
+            } else {
+                foreach ($allCategories as $category) {
+                    $photosByCategory[$category] = GalleryItem::where('category', $category)->count();
+                }
             }
             
             return view('admin.gallery.categories', [
-                'categories' => $categories,
+                'categories' => $allCategories,
                 'umbrellaCategories' => $umbrellaCategories,
                 'photosByCategory' => $photosByCategory
             ]);
         } catch (\Exception $e) {
             \Log::error('Error loading categories page: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan saat memuat halaman kategori.');
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return view('admin.gallery.categories', [
+                'categories' => [],
+                'umbrellaCategories' => [],
+                'photosByCategory' => []
+            ]);
         }
     }
 
