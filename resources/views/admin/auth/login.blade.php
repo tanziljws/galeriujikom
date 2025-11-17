@@ -33,26 +33,26 @@
     </script>
   </head>
   <body class="min-h-full bg-admin-login flex items-center justify-center p-6">
-    <div class="relative w-full max-w-xl mx-auto">
+    <div class="relative w-full max-w-md md:max-w-lg mx-auto">
       <!-- Single centered card -->
       <div id="login-card" class="rounded-2xl shadow-2xl overflow-hidden glass text-white">
         <!-- Header -->
-        <div class="px-6 pt-8 pb-5 text-center">
-          <img src="{{ asset('images/smkn login.png') }}" alt="Logo SMKN 4 Bogor" class="w-16 h-16 mx-auto mb-2 rounded" />
-          <h1 class="text-2xl md:text-3xl font-extrabold text-white">SMK Negeri 4 Kota Bogor</h1>
-          <div class="text-white/80 text-sm">Admin Panel</div>
+        <div class="px-4 pt-5 pb-3 text-center">
+          <img src="{{ asset('images/smkn login.png') }}" alt="Logo SMKN 4 Bogor" class="w-12 h-12 mx-auto mb-2 rounded" />
+          <h1 class="text-lg md:text-xl font-extrabold text-white">SMK Negeri 4 Kota Bogor</h1>
+          <div class="text-white/80 text-xs">Admin Panel</div>
         </div>
         <div class="h-px bg-white/20"></div>
 
         <!-- Form content -->
-        <div class="p-6 md:p-8">
-          <h2 class="text-center text-lg font-bold mb-5 text-white">Login Admin</h2>
+        <div class="p-4 md:p-5">
+          <h2 class="text-center text-base font-bold mb-4 text-white">Login Admin</h2>
 
           @if ($errors->any())
             <div class="mb-4 rounded-md bg-red-500/15 border border-red-400/40 text-red-200 px-3 py-2 text-sm">{{ $errors->first() }}</div>
           @endif
 
-          <form method="POST" action="{{ route('admin.login.submit') }}" class="grid gap-4">
+          <form method="POST" action="{{ route('admin.login.submit') }}" class="grid gap-3">
             @csrf
             <div>
               <label class="block text-sm font-medium text-white/90 mb-1">Username</label>
@@ -71,18 +71,18 @@
             <!-- Placeholder for captcha if needed later -->
             <!--<div class="rounded-md border border-slate-300 p-3 text-sm text-slate-600">reCAPTCHA placeholder</div>-->
 
-            <button class="mt-2 inline-flex items-center justify-center rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 text-sm font-semibold shadow-md hover:brightness-110 transition">
+            <button class="mt-1 inline-flex items-center justify-center rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2.5 text-sm font-semibold shadow-md hover:brightness-110 transition">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H8l-5 5v-5H5a2 2 0 002-2V3z"/></svg>
               Login
             </button>
           </form>
 
-          <div class="flex items-center gap-4 mt-6">
+          <div class="flex items-center gap-3 mt-4">
             <div class="h-px bg-white/20 flex-1"></div>
             <div class="text-xs text-white/70">SMKN 4 Bogor</div>
             <div class="h-px bg-white/20 flex-1"></div>
           </div>
-          <div class="text-center text-xs text-white/70 mt-3">&copy; {{ date('Y') }} SMKN 4 Bogor</div>
+          <div class="text-center text-xs text-white/70 mt-2">&copy; {{ date('Y') }} SMKN 4 Bogor</div>
         </div>
       </div>
       <div class="text-center mt-4">

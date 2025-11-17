@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     @stack('styles')
@@ -14,15 +13,37 @@
         :root{
             --primary-blue:#3b6ea5; --soft-blue:#7aa9d6; --bg:#0f172a; --card:#0b1220; --muted:#94a3b8;
         }
-        /* shadcn-like tokens */
-        .card{ @apply bg-white/70 dark:bg-slate-900/60 backdrop-blur border border-slate-200/50 dark:border-slate-800/60 rounded-xl; }
-        .btn-primary{ @apply inline-flex items-center justify-center rounded-md bg-blue-600 text-white px-3 py-2 text-sm font-medium hover:bg-blue-700 transition; }
-        .btn-light{ @apply inline-flex items-center justify-center rounded-md bg-white text-slate-700 px-3 py-2 text-sm font-medium hover:bg-slate-100 border; }
-        .input{ @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500; }
-        .label{ @apply block text-sm font-medium text-slate-700 mb-1; }
-        .table{ @apply w-full text-sm; }
-        .table th{ @apply text-left font-semibold text-slate-600 border-b; }
-        .table td{ @apply border-b py-3; }
+        
+        /* Ensure CRUD Button Colors are Consistent */
+        .btn-outline-primary {
+            border-color: #3b82f6 !important;
+            color: #3b82f6 !important;
+        }
+        .btn-outline-primary:hover {
+            background-color: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+            color: white !important;
+        }
+        
+        .btn-outline-warning {
+            border-color: #f59e0b !important;
+            color: #f59e0b !important;
+        }
+        .btn-outline-warning:hover {
+            background-color: #f59e0b !important;
+            border-color: #f59e0b !important;
+            color: white !important;
+        }
+        
+        .btn-outline-danger {
+            border-color: #ef4444 !important;
+            color: #ef4444 !important;
+        }
+        .btn-outline-danger:hover {
+            background-color: #ef4444 !important;
+            border-color: #ef4444 !important;
+            color: white !important;
+        }
     </style>
     <style>
         /* Admin Layout */
@@ -43,6 +64,7 @@
         .admin-menu a i { font-size: 1.15rem; opacity:.95; }
         .admin-menu a:hover { background: rgba(255,255,255,.16); transform: translateX(2px); }
         .admin-menu a.active { background: rgba(255,255,255,.22); font-weight:700; }
+        .admin-menu button:hover { background: rgba(255,255,255,.16) !important; transform: translateX(2px); }
 
         .admin-main { display:flex; flex-direction:column; }
         .admin-topbar { background: linear-gradient(90deg, var(--primary-blue), var(--soft-blue)); color:#fff; padding:.75rem 1rem; display:grid; grid-template-columns: 1fr 1fr auto; align-items:center; gap:12px; box-shadow:0 2px 12px rgba(0,0,0,.1); position: sticky; top: 0; z-index: 1040; }
@@ -117,15 +139,20 @@
         <ul class="admin-menu">
             <li><a class="{{ request()->is('admin/dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}"><i class="ri-dashboard-2-line"></i> Dashboard</a></li>
             <li><a class="{{ request()->is('admin/guru-staf*') ? 'active' : '' }}" href="{{ route('admin.guru-staf.index') }}"><i class="ri-home-5-line"></i> Kelola Beranda</a></li>
-            <li><a class="{{ request()->is('admin/posts*') ? 'active' : '' }}" href="{{ route('admin.posts.index') }}"><i class="ri-article-line"></i> Kelola Informasi</a></li>
+            <li><a class="{{ request()->is('admin/informations*') ? 'active' : '' }}" href="{{ route('admin.informations.index') }}"><i class="ri-article-line"></i> Kelola Informasi</a></li>
             <li><a class="{{ request()->is('admin/agendas*') ? 'active' : '' }}" href="{{ route('admin.agendas.index') }}"><i class="ri-calendar-event-line"></i> Kelola Agenda</a></li>
             <li><a class="{{ request()->is('admin/gallery') ? 'active' : '' }}" href="{{ route('admin.gallery.index') }}"><i class="ri-image-2-line"></i> Kelola Galeri</a></li>
             <li><a class="{{ request()->is('admin/gallery/categories*') ? 'active' : '' }}" href="{{ route('admin.gallery.categories.index') }}"><i class="ri-price-tag-3-line"></i> Kategori Galeri</a></li>
-            <li><a class="{{ request()->is('admin/gallery/report*') ? 'active' : '' }}" href="{{ route('admin.gallery.report') }}"><i class="ri-bar-chart-2-line"></i> Laporan Interaksi</a></li>
+            <li><a class="{{ request()->is('admin/reports*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}"><i class="ri-bar-chart-box-line"></i> Laporan</a></li>
+            @if(auth('petugas')->check() && auth('petugas')->user()->isAdmin())
+                <li><a class="{{ request()->is('admin/users*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}"><i class="ri-user-settings-line"></i> Manajemen Admin</a></li>
+            @endif
             <li>
-                <form method="POST" action="{{ route('admin.logout') }}">
+                <form method="POST" action="{{ route('admin.logout') }}" class="w-100">
                     @csrf
-                    <button type="submit" class="w-full text-left bg-white/10 hover:bg-white/20 rounded-md px-3 py-2 mt-2">🚪 Logout</button>
+                    <button type="submit" class="w-100 text-start border-0" style="background: transparent; color: #fff; padding: 0.6rem 0.8rem; border-radius: 12px; transition: background 0.2s ease, transform 0.15s ease; cursor: pointer;">
+                        <i class="ri-logout-box-r-line me-2" style="font-size: 1.15rem; opacity: 0.95;"></i> Logout
+                    </button>
                 </form>
             </li>
         </ul>

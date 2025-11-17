@@ -6,7 +6,7 @@
     <title>@yield('title', 'SMKN 4 BOGOR')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/dashboard.css') }}?v={{ time() }}" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @stack('styles')
     <style>
@@ -18,8 +18,54 @@
         /* Glass helpers */
         .glass { background: rgba(255,255,255,.10); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border:1px solid rgba(255,255,255,.18); }
         .glass-soft { background: rgba(255,255,255,.08); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,.14); }
-        /* Make navbar glass and sticky feel */
-        .glass-nav{ background: rgba(14,42,71,.65)!important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.18); }
+        /* Make navbar glass and sticky feel with rounded corners (floating capsule) */
+        .glass-nav{ 
+            background: rgba(14,42,71,.65)!important; 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255,255,255,.18);
+            position: relative;
+            z-index: 1050 !important;
+            border-radius: 25px !important;
+            margin: 15px 10px;
+            max-width: calc(100% - 20px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Adjust body padding for floating navbar */
+        body.bg-user-surface {
+            padding-top: 0 !important;
+        }
+        
+        /* Dropdown menu z-index */
+        .navbar .dropdown-menu {
+            z-index: 1060 !important;
+        }
+        
+        /* Rounded/Pill Nav Links */
+        .navbar-nav .nav-link {
+            border-radius: 50px !important;
+            padding: 0.5rem 1.25rem !important;
+            margin: 0 0.25rem !important;
+            transition: all 0.3s ease !important;
+            background: transparent !important;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
+            transform: translateY(-2px);
+        }
+        
+        .navbar-nav .nav-link.active {
+            background: rgba(255, 255, 255, 0.25) !important;
+            font-weight: 600;
+        }
+        
+        /* Rounded Button for Daftar */
+        .btn-primary.btn-sm {
+            border-radius: 50px !important;
+            padding: 0.5rem 1.25rem !important;
+        }
         /* Cards on public pages become semi-transparent */
         .main-content-wrapper .dashboard-card, .main-content-wrapper .card{
             background: rgba(255,255,255,.78);
@@ -68,6 +114,37 @@
                             <i class="fas fa-calendar-alt me-1"></i>Agenda
                         </a>
                     </li>
+                    
+                    @auth
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1"></i>{{ Auth::user()->name }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><span class="dropdown-item-text small text-muted">{{ Auth::user()->email }}</span></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary btn-sm ms-2" href="{{ route('register') }}">
+                                <i class="fas fa-user-plus me-1"></i>Daftar
+                            </a>
+                        </li>
+                    @endauth
                 </ul>
             </div>
         </div>

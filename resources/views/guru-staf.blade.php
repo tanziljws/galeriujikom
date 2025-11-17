@@ -111,41 +111,33 @@
             };
         @endphp
 
-        <div class="dashboard-card mb-4 headmaster-section">
-            <h5 class="mb-2">Kepala Sekolah</h5>
-            <div class="gallery-grid">
-                @forelse(($kepala ?? []) as $i => $filename)
-                    @php
-                        [$name,$gelar] = $parseMeta($filename);
-                        $src = asset('images/kepala-sekolah/'.$filename);
-                        $displayName = trim($name . (!empty($gelar) ? ', ' . $gelar : ''));
-                    @endphp
-                    <div class="person-card">
-                        <div class="person-photo">
-                            <img src="{{ $src }}" alt="{{ $displayName }}">
-                        </div>
-                        <div class="person-info headmaster-info">
-                            <div class="person-name">{{ $displayName }}</div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="text-muted">Belum ada foto kepala sekolah.</div>
-                @endforelse
-            </div>
-        </div>
+        @php
+            // Gabungkan Kepala Sekolah + Guru, kepala ditaruh paling awal
+            $guruAll = [];
+            foreach (($kepala ?? []) as $f) { $guruAll[] = ['dir' => 'kepala-sekolah', 'filename' => $f]; }
+            foreach (($guru ?? []) as $f) { $guruAll[] = ['dir' => 'guru', 'filename' => $f]; }
+        @endphp
 
         <div class="dashboard-card mb-4">
-            <h5 class="mb-2">Guru</h5>
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <h5 class="mb-0">Kepala Sekolah</h5>
+                <span class="text-muted">|</span>
+                <h5 class="mb-0">Guru</h5>
+            </div>
             <div class="gallery-grid">
-                @forelse(($guru ?? []) as $i => $filename)
+                @forelse($guruAll as $i => $it)
                     @php
-                        [$name,$mapel] = $parseMeta($filename);
-                        $src = asset('images/guru/'.$filename);
-                        $displayName = trim($name . (!empty($mapel) ? ', ' . $mapel : ''));
+                        $filename = $it['filename'] ?? '';
+                        [$name,$meta] = $parseMeta($filename);
+                        $src = asset('images/' . ($it['dir'] ?? 'guru') . '/' . $filename);
+                        $displayName = trim($name . (!empty($meta) ? ', ' . $meta : ''));
                     @endphp
                     <div class="person-card teacher">
+                        @if($i === 0 && ($it['dir'] ?? '') === 'kepala-sekolah')
+                            <div class="person-tag">Kepala Sekolah</div>
+                        @endif
                         <div class="person-photo">
-                            <img src="{{ $src }}" alt="{{ $name }}">
+                            <img src="{{ $src }}" alt="{{ $displayName }}">
                         </div>
                         <div class="person-info">
                             <div class="person-name">{{ $displayName }}</div>
@@ -215,14 +207,9 @@
         .gallery-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
     }
 
-    /* Batasi ukuran tampilan Kepala Sekolah agar tidak kebesaran */
-    .headmaster-section { max-width: 320px; margin-left:auto; margin-right:auto; }
-    .headmaster-section .gallery-grid { grid-template-columns: 1fr; }
-    .headmaster-section .person-photo { padding-top: 0; height: 320px; }
-    .headmaster-section .person-photo img { width: 100%; height: 100%; object-fit: cover; }
-    .headmaster-section .headmaster-info { text-align: center; }
-    @media (min-width: 768px) { .headmaster-section { max-width: 300px; } }
-    @media (min-width: 992px) { .headmaster-section { max-width: 320px; } }
+    /* Tidak perlu section khusus kepala sekolah; sudah digabung di awal grid guru */
+    .person-tag{ position:absolute; top:8px; left:8px; background: rgba(59,110,165,.95); color:#fff; padding:.18rem .5rem; border-radius:8px; font-size:.75rem; font-weight:700; box-shadow:0 6px 14px rgba(0,0,0,.15); }
+    /* (tidak ada heading grid agar kepala sekolah berada satu baris dengan guru) */
 </style>
 @endpush
 @endsection

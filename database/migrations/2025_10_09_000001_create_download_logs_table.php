@@ -9,14 +9,15 @@ return new class extends Migration {
     {
         Schema::create('download_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('filename')->nullable();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
+            $table->string('photo_id');
             $table->string('url', 1000)->nullable();
-            $table->string('name', 120);
-            $table->string('email', 150);
-            $table->string('role', 30);
-            $table->string('purpose', 500);
+            $table->string('filename')->nullable();
             $table->string('ip', 64)->nullable();
             $table->timestamps();
+            
+            $table->index(['photo_id']);
+            $table->index(['user_id']);
         });
     }
 

@@ -20,62 +20,6 @@
 @endif
 
 <div class="card-elevated p-3">
-    <!-- Search and Filter Form -->
-    <div class="mb-4">
-        <form action="{{ route('admin.guru-staf.index') }}" method="GET" class="row g-3">
-            <div class="col-md-8">
-                <div class="input-group">
-                    <input type="text" 
-                           name="search" 
-                           class="form-control" 
-                           placeholder="Cari berdasarkan nama file..." 
-                           value="{{ request('search') }}"
-                           aria-label="Cari guru/staf">
-                    <button class="btn btn-primary" type="submit">
-                        <i class="ri-search-line me-1"></i> Cari
-                    </button>
-                    @if(request('search') || request('type'))
-                        <a href="{{ route('admin.guru-staf.index') }}" class="btn btn-outline-secondary" title="Hapus semua filter">
-                            <i class="ri-close-line"></i>
-                        </a>
-                    @endif
-                </div>
-            </div>
-            <div class="col-md-4">
-                <select name="type" class="form-select" onchange="this.form.submit()" aria-label="Filter berdasarkan tipe">
-                    <option value="">Semua Tipe</option>
-                    <option value="guru" {{ request('type') == 'guru' ? 'selected' : '' }}>Guru</option>
-                    <option value="staf" {{ request('type') == 'staf' ? 'selected' : '' }}>Staf</option>
-                    <option value="kepala-sekolah" {{ request('type') == 'kepala-sekolah' ? 'selected' : '' }}>Kepala Sekolah</option>
-                </select>
-            </div>
-        </form>
-        
-        @if(request('search') || request('type'))
-            <div class="mt-2">
-                <small class="text-muted">
-                    Menampilkan hasil untuk: 
-                    @if(request('search'))
-                        <span class="badge bg-primary">
-                            <i class="ri-search-line me-1"></i>{{ request('search') }}
-                        </span>
-                    @endif
-                    @if(request('type'))
-                        <span class="badge bg-secondary ms-1">
-                            <i class="ri-filter-line me-1"></i>
-                            @if(request('type') == 'guru') Guru
-                            @elseif(request('type') == 'staf') Staf
-                            @elseif(request('type') == 'kepala-sekolah') Kepala Sekolah
-                            @endif
-                        </span>
-                    @endif
-                    <a href="{{ route('admin.guru-staf.index') }}" class="text-danger ms-2" title="Hapus semua filter">
-                        <small><i class="ri-close-line"></i> Hapus filter</small>
-                    </a>
-                </small>
-            </div>
-        @endif
-    </div>
 
     <div class="row g-3">
         @forelse(($items ?? []) as $i => $it)

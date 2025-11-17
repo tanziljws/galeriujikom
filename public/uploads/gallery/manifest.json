@@ -9,7 +9,7 @@
     },
     {
         "title": "Workshop Guru",
-        "category": "Kegiatan Guru",
+        "category": "Kegiatan Guru & Staf",
         "caption": "",
         "filename": "img_68d0ee8895197_WhatsApp_Image_2025-09-22_at_13.25.23.jpeg",
         "url": "http://127.0.0.1:8000/uploads/gallery/img_68d0ee8895197_WhatsApp_Image_2025-09-22_at_13.25.23.jpeg",
@@ -17,7 +17,7 @@
     },
     {
         "title": "Workshop Guru",
-        "category": "Kegiatan Guru",
+        "category": "Kegiatan Guru & Staf",
         "caption": "",
         "filename": "img_68d0ef377a0c5_WhatsApp_Image_2025-09-22_at_13.25.18__1_.jpeg",
         "url": "http://127.0.0.1:8000/uploads/gallery/img_68d0ef377a0c5_WhatsApp_Image_2025-09-22_at_13.25.18__1_.jpeg",
@@ -814,7 +814,7 @@
     },
     {
         "title": "Kapolsek",
-        "category": "Akademik",
+        "category": "Kegiatan Sekolah",
         "caption": "",
         "filename": "img_68e891cb97fd3_WhatsApp_Image_2025-10-10_at_11.17.35.jpeg",
         "url": "http://127.0.0.1:8000/uploads/gallery/img_68e891cb97fd3_WhatsApp_Image_2025-10-10_at_11.17.35.jpeg",
@@ -828,6 +828,60 @@
         "filename": "img_68f21de92df2a_kapolsek.jpeg",
         "url": "http://127.0.0.1:8000/uploads/gallery/img_68f21de92df2a_kapolsek.jpeg",
         "uploaded_at": "2025-10-17T10:43:53+00:00",
+        "created_by": "admin"
+    },
+    {
+        "title": "Kapolsek",
+        "category": "Kegiatan Sekolah",
+        "caption": "",
+        "filename": "img_68fc4d74c8756_kapolcekzs.jpeg",
+        "url": "http://127.0.0.1:8000/uploads/gallery/img_68fc4d74c8756_kapolcekzs.jpeg",
+        "uploaded_at": "2025-10-25T11:09:24+07:00",
+        "created_by": "admin"
+    },
+    {
+        "title": "Kapolsek",
+        "category": "Kegiatan Sekolah",
+        "caption": "",
+        "filename": "img_68fc4dadab653_kapol_1.jpeg",
+        "url": "http://127.0.0.1:8000/uploads/gallery/img_68fc4dadab653_kapol_1.jpeg",
+        "uploaded_at": "2025-10-25T11:10:21+07:00",
+        "created_by": "admin"
+    },
+    {
+        "title": "Kapolsek",
+        "category": "Kegiatan Sekolah",
+        "caption": "",
+        "filename": "img_68fc4dcfbc5e3_kapol_2.jpeg",
+        "url": "http://127.0.0.1:8000/uploads/gallery/img_68fc4dcfbc5e3_kapol_2.jpeg",
+        "uploaded_at": "2025-10-25T11:10:55+07:00",
+        "created_by": "admin"
+    },
+    {
+        "title": "Kapolsek",
+        "category": "Kegiatan Sekolah",
+        "caption": "",
+        "filename": "img_68fc4df1d7c1c_kapol_3.jpeg",
+        "url": "http://127.0.0.1:8000/uploads/gallery/img_68fc4df1d7c1c_kapol_3.jpeg",
+        "uploaded_at": "2025-10-25T11:11:29+07:00",
+        "created_by": "admin"
+    },
+    {
+        "title": "Kapolsek",
+        "category": "Kegiatan Sekolah",
+        "caption": "",
+        "filename": "img_68fc4e0f9f0c9_kapol_4.jpeg",
+        "url": "http://127.0.0.1:8000/uploads/gallery/img_68fc4e0f9f0c9_kapol_4.jpeg",
+        "uploaded_at": "2025-10-25T11:11:59+07:00",
+        "created_by": "admin"
+    },
+    {
+        "title": "Kapolsek",
+        "category": "Kegiatan Sekolah",
+        "caption": "",
+        "filename": "img_68fc4e2c43c03_kapol_5.jpeg",
+        "url": "http://127.0.0.1:8000/uploads/gallery/img_68fc4e2c43c03_kapol_5.jpeg",
+        "uploaded_at": "2025-10-25T11:12:28+07:00",
         "created_by": "admin"
     }
 ]

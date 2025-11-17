@@ -19,62 +19,6 @@
       <div class="alert alert-success mb-3">{{ session('status') }}</div>
     @endif
 
-    <!-- Search and Filter Form -->
-    <div class="mb-4">
-        <form action="{{ route('admin.posts.index') }}" method="GET" class="row g-3">
-            <div class="col-md-8">
-                <div class="input-group">
-                    <input type="text" 
-                           name="search" 
-                           class="form-control" 
-                           placeholder="Cari informasi berdasarkan judul, deskripsi, atau kategori..." 
-                           value="{{ request('search') }}"
-                           aria-label="Cari informasi">
-                    <button class="btn btn-primary" type="submit">
-                        <i class="ri-search-line me-1"></i> Cari
-                    </button>
-                    @if(request('search') || request('category'))
-                        <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary" title="Hapus semua filter">
-                            <i class="ri-close-line"></i>
-                        </a>
-                    @endif
-                </div>
-            </div>
-            <div class="col-md-4">
-                <select name="category" class="form-select" onchange="this.form.submit()" aria-label="Filter berdasarkan kategori">
-                    <option value="">Semua Kategori</option>
-                    <option value="Pendaftaran" {{ request('category') == 'Pendaftaran' ? 'selected' : '' }}>Pendaftaran</option>
-                    <option value="Akademik" {{ request('category') == 'Akademik' ? 'selected' : '' }}>Akademik</option>
-                    <option value="Kerjasama" {{ request('category') == 'Kerjasama' ? 'selected' : '' }}>Kerjasama</option>
-                    <option value="Prestasi" {{ request('category') == 'Prestasi' ? 'selected' : '' }}>Prestasi</option>
-                    <option value="Sertifikasi" {{ request('category') == 'Sertifikasi' ? 'selected' : '' }}>Sertifikasi</option>
-                    <option value="Ekstrakurikuler" {{ request('category') == 'Ekstrakurikuler' ? 'selected' : '' }}>Ekstrakurikuler</option>
-                </select>
-            </div>
-        </form>
-        
-        @if(request('search') || request('category'))
-            <div class="mt-2">
-                <small class="text-muted">
-                    Menampilkan hasil untuk: 
-                    @if(request('search'))
-                        <span class="badge bg-primary">
-                            <i class="ri-search-line me-1"></i>{{ request('search') }}
-                        </span>
-                    @endif
-                    @if(request('category'))
-                        <span class="badge bg-secondary ms-1">
-                            <i class="ri-filter-line me-1"></i>{{ request('category') }}
-                        </span>
-                    @endif
-                    <a href="{{ route('admin.posts.index') }}" class="text-danger ms-2" title="Hapus semua filter">
-                        <small><i class="ri-close-line"></i> Hapus filter</small>
-                    </a>
-                </small>
-            </div>
-        @endif
-    </div>
-
     <div class="row g-3">
         @forelse(($items ?? []) as $i => $it)
         <div class="col-12 col-sm-6 col-lg-4">

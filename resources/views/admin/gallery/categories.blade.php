@@ -58,15 +58,23 @@
 @endpush
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h4 class="mb-1">Kategori Galeri</h4>
-    <p class="text-muted mb-0">Kelola kategori untuk galeri foto</p>
+<div class="container-fluid px-4">
+  <!-- Header Card -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: white !important;">
+    <div class="card-body py-4 px-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="text-center flex-grow-1">
+          <h2 class="mb-2" style="font-weight: 700; color: #3b6ea5;">Kategori Galeri</h2>
+          <p class="mb-0" style="color: #6c757d;">Kelola kategori untuk galeri foto</p>
+        </div>
+        <div>
+          <a href="{{ route('admin.gallery.index') }}" class="btn btn-outline-secondary">
+            <i class="ri-arrow-left-line me-1"></i> Kembali
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
-  <a href="{{ route('admin.gallery.index') }}" class="btn btn-outline-secondary">
-    <i class="ri-arrow-left-line me-1"></i> Kembali ke Galeri
-  </a>
-</div>
 
 @if ($errors->any())
   <div class="alert alert-danger">
@@ -86,19 +94,19 @@
 @endif
 
 <!-- Card Tambah Kategori Baru -->
-<div class="card mb-4">
-  <div class="card-body">
-    <h5 class="card-title">Tambah Kategori Baru</h5>
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+  <div class="card-body p-4">
+    <h5 class="mb-3" style="color: #3b6ea5; font-weight: 600;">Tambah Kategori Baru</h5>
     <form method="POST" action="{{ route('admin.gallery.categories.store') }}" class="row g-3">
       @csrf
       <div class="col-md-8">
         <div class="input-group">
-          <span class="input-group-text"><i class="ri-add-line"></i></span>
+          <span class="input-group-text bg-light"><i class="ri-add-line"></i></span>
           <input type="text" name="name" class="form-control" placeholder="Masukkan nama kategori" required>
         </div>
       </div>
       <div class="col-md-4">
-        <button type="submit" class="btn btn-primary w-100">
+        <button type="submit" class="btn btn-primary w-100 rounded-pill">
           <i class="ri-add-circle-line me-1"></i> Tambah Kategori
         </button>
       </div>
@@ -106,69 +114,7 @@
   </div>
 </div>
 
-<div class="dashboard-card mb-4 position-relative">
-  <div class="d-flex justify-content-between align-items-center mb-2">
-    <h5 class="mb-0">Kunjungan Saya</h5>
-    <small class="text-muted">Minggu ini</small>
-  </div>
-  <div class="d-flex align-items-center gap-4 flex-wrap">
-    <div class="text-center">
-      <div style="width:120px;height:120px" id="radial-struktur"></div>
-      <div class="small text-muted mt-1" id="cap-struktur"></div>
-    </div>
-    <div class="text-center">
-      <div style="width:120px;height:120px" id="radial-pemrograman"></div>
-      <div class="small text-muted mt-1" id="cap-pemrograman"></div>
-    </div>
-    <div class="text-center">
-      <div style="width:120px;height:120px" id="radial-database"></div>
-      <div class="small text-muted mt-1" id="cap-database"></div>
-    </div>
-  </div>
-  <a href="{{ route('admin.dashboard') }}" class="stretched-link" aria-label="Buka Dashboard"></a>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-<script>
-  function radial(selector, label, value){
-    new ApexCharts(document.querySelector(selector), {
-      chart:{ type:'radialBar', sparkline:{enabled:true}},
-      series:[value],
-      labels:[label],
-      plotOptions:{
-        radialBar:{
-          hollow:{ size:'60%' },
-          track:{ background:'#e9eef8' },
-          dataLabels:{
-            name:{ show:false },
-            value:{ formatter: function(v){ return Math.round(v)+'%'; } }
-          }
-        }
-      },
-      colors:['#3b82f6']
-    }).render();
-  }
-  const data = @json($radials ?? []);
-  const a = data[0] || {label:'Struktur', value:0, count:0};
-  const b = data[1] || {label:'Pemrograman', value:0, count:0};
-  const c = data[2] || {label:'Database', value:0, count:0};
-  // render charts
-  radial('#radial-struktur', a.label, a.value);
-  radial('#radial-pemrograman', b.label, b.value);
-  radial('#radial-database', c.label, c.value);
-  // append view counts under each chart for clarity
-  const addCount = (sel, cnt) => {
-    const el = document.querySelector(sel);
-    if (!el) return;
-    const info = document.createElement('div');
-    info.className = 'small text-muted text-center mt-1';
-    info.textContent = `views (${cnt||0})`;
-    el.insertAdjacentElement('afterend', info);
-  };
-  addCount('#radial-struktur', a.count);
-  addCount('#radial-pemrograman', b.count);
-  addCount('#radial-database', c.count);
-  </script>
 
 <!-- Card Daftar Kategori -->
 <div class="card">
@@ -205,12 +151,79 @@
               </td>
               <td class="text-end">
                 <div class="btn-group" role="group">
-                  <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCategory{{ $i }}">
+                  <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailCategory{{ $i }}">
+                    <i class="ri-eye-line"></i> Detail
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editCategory{{ $i }}">
                     <i class="ri-edit-line"></i> Edit
                   </button>
                   <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteCategory{{ $i }}">
-                    <i class="ri-delete-bin-line"></i>
+                    <i class="ri-delete-bin-line"></i> Hapus
                   </button>
+                </div>
+                
+                <!-- Modal Detail -->
+                <div class="modal fade" id="detailCategory{{ $i }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
+                  <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                      <div class="modal-header bg-info bg-opacity-10">
+                        <h5 class="modal-title text-info">
+                          <i class="ri-folder-2-line me-2"></i>Detail Kategori
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="row mb-3">
+                          <div class="col-md-4 fw-bold">Nama Kategori:</div>
+                          <div class="col-md-8">{{ $category }}</div>
+                        </div>
+                        <div class="row mb-3">
+                          <div class="col-md-4 fw-bold">Jumlah Foto:</div>
+                          <div class="col-md-8">
+                            <span class="badge bg-primary">{{ $photosByCategory[$category] ?? 0 }} foto</span>
+                          </div>
+                        </div>
+                        <hr>
+                        <h6 class="mb-3">Foto dalam kategori ini:</h6>
+                        @php
+                          $manifestPath = public_path('uploads/gallery/manifest.json');
+                          $categoryPhotos = [];
+                          if (file_exists($manifestPath)) {
+                            $allPhotos = json_decode(file_get_contents($manifestPath), true) ?: [];
+                            foreach ($allPhotos as $photo) {
+                              if (($photo['category'] ?? '') === $category) {
+                                $categoryPhotos[] = $photo;
+                              }
+                            }
+                          }
+                        @endphp
+                        
+                        @if(count($categoryPhotos) > 0)
+                          <div class="row g-2">
+                            @foreach($categoryPhotos as $photo)
+                              <div class="col-md-3 col-6">
+                                <div class="card">
+                                  <img src="{{ $photo['url'] ?? '' }}" class="card-img-top" alt="{{ $photo['title'] ?? 'Foto' }}" style="height: 120px; object-fit: cover;">
+                                  <div class="card-body p-2">
+                                    <p class="card-text small text-truncate mb-0" title="{{ $photo['title'] ?? 'Tanpa judul' }}">
+                                      {{ $photo['title'] ?? 'Tanpa judul' }}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            @endforeach
+                          </div>
+                        @else
+                          <div class="alert alert-info">
+                            <i class="ri-information-line me-2"></i>Belum ada foto dalam kategori ini
+                          </div>
+                        @endif
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
                 <!-- Modal Edit -->
@@ -282,6 +295,8 @@
       </div>
     @endif
   </div>
+</div>
+
 </div>
 @endsection
 

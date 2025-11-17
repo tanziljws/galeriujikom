@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Information;
+use Illuminate\Support\Facades\Auth;
 
 class InformationController extends Controller
 {
@@ -173,101 +175,97 @@ class InformationController extends Controller
 
     public function index(Request $request)
     {
-        // Read admin-managed informations from manifest
-        $dir = public_path('uploads/informations');
-        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $managed = is_file($manifestPath) ? (json_decode(file_get_contents($manifestPath), true) ?: []) : [];
-        // Seed fallback (can be removed later if not needed)
-        $seeds = $this->getInformations();
-        // Merge: managed first, then seeds
-        $informations = array_merge($managed, $seeds);
+        // Ambil informasi dari DB (terbaru berdasarkan created_at)
+        $items = Information::orderByDesc('created_at')->limit(10)->get();
+        // Map ke struktur yang dipakai view publik saat ini
+        $informations = $items->map(function($it){
+            return [
+                'id' => $it->id,
+                'title' => $it->title,
+                'description' => $it->description,
+                'content' => $it->content,
+                'date' => $it->date,
+                'category' => $it->category,
+                'image' => $it->image_path ? (str_starts_with($it->image_path, 'http') ? $it->image_path : asset('uploads/informations/'.$it->image_path)) : null,
+                'is_featured' => false,
+            ];
+        });
 
-        // Data statistik sekolah
+        // Data statistik sekolah (statis sementara)
         $stats = [
-            [
-                'title' => 'Total Siswa',
-                'value' => '1,250',
-                'icon' => '👥',
-                'color' => 'bg-blue-100 text-blue-800'
-            ],
-            [
-                'title' => 'Jurusan',
-                'value' => '4',
-                'icon' => '🎓',
-                'color' => 'bg-green-100 text-green-800'
-            ],
-            [
-                'title' => 'Guru & Staff',
-                'value' => '85',
-                'icon' => '👨‍🏫',
-                'color' => 'bg-purple-100 text-purple-800'
-            ],
-            [
-                'title' => 'Alumni Sukses',
-                'value' => '5,000+',
-                'icon' => '🏆',
-                'color' => 'bg-yellow-100 text-yellow-800'
-            ]
+            ['title' => 'Total Siswa','value' => '1,250','icon' => '👥','color' => 'bg-blue-100 text-blue-800'],
+            ['title' => 'Jurusan','value' => '4','icon' => '🎓','color' => 'bg-green-100 text-green-800'],
+            ['title' => 'Guru & Staff','value' => '85','icon' => '👨‍🏫','color' => 'bg-purple-100 text-purple-800'],
+            ['title' => 'Alumni Sukses','value' => '5,000+','icon' => '🏆','color' => 'bg-yellow-100 text-yellow-800'],
         ];
-
-        // Convert array to collection for easier filtering and sort by date desc
-        // LIMIT: tampilkan maksimal 10 informasi di halaman publik
-        $informations = collect($informations)
-            ->sortByDesc(function($it){ return $it['date'] ?? '1970-01-01'; })
-            ->take(10)
-            ->values();
 
         return view('information', compact('informations', 'stats'));
     }
 
     public function show($id)
     {
-        // Find in managed + seeds
-        $dir = public_path('uploads/informations');
-        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $managed = is_file($manifestPath) ? (json_decode(file_get_contents($manifestPath), true) ?: []) : [];
-        $informations = collect(array_merge($managed, $this->getInformations()));
-        $item = $informations->first(function($it) use ($id){ return (string)($it['id'] ?? '') === (string)$id; });
-
-        if (!$item) {
-            abort(404);
-        }
-
-        // informasi terkait (misal 3 item lain)
-        $related = collect($informations)
-            ->where('id', '!=', (int) $id)
-            ->where('category', $item['category'])
-            ->take(3)
-            ->values();
-
-        return view('information-detail', [
-            'info' => $item,
-            'related' => $related,
-        ]);
+        $it = Information::findOrFail($id);
+        $item = [
+            'id' => $it->id,
+            'title' => $it->title,
+            'description' => $it->description,
+            'content' => $it->content,
+            'date' => $it->date,
+            'category' => $it->category,
+            'image' => $it->image_path ? (str_starts_with($it->image_path, 'http') ? $it->image_path : asset('uploads/informations/'.$it->image_path)) : null,
+        ];
+        $related = Information::where('id','!=',$it->id)
+            ->where('category',$it->category)
+            ->latest('created_at')
+            ->limit(3)
+            ->get()
+            ->map(function($r){
+                return [
+                    'id' => $r->id,
+                    'title' => $r->title,
+                    'description' => $r->description,
+                    'date' => $r->date,
+                    'category' => $r->category,
+                    'image' => $r->image_path ? (str_starts_with($r->image_path, 'http') ? $r->image_path : asset('uploads/informations/'.$r->image_path)) : null,
+                ];
+            });
+        return view('information-detail', [ 'info' => $item, 'related' => $related ]);
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:200',
             'description' => 'required|string|max:500',
             'content' => 'nullable|string',
-            'date' => 'required|date',
-            'category' => 'required|string|max:50',
-            'image' => 'nullable|url',
+            'date' => 'nullable|date',
+            'category' => 'nullable|string|max:50',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'image_url' => 'nullable|url'
         ]);
 
-        // Fallbacks
-        if (empty($data['image'])) {
-            $data['image'] = 'https://via.placeholder.com/400x250/7A9CC6/FFFFFF?text=Informasi';
+        $dir = public_path('uploads/informations');
+        if (!is_dir($dir)) { @mkdir($dir,0755,true); }
+        $imagePath = null;
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $safe = preg_replace('/[^A-Za-z0-9_\.-]/','_', $file->getClientOriginalName());
+            $filename = uniqid('info_')."_".$safe;
+            $file->move($dir, $filename);
+            $imagePath = $filename; // lokal
+        } elseif (!empty($validated['image_url'])) {
+            $imagePath = $validated['image_url']; // URL
         }
-        $data['is_featured'] = false;
-        $data['id'] = (int) (microtime(true) * 1000); // simple unique id
 
-        // Prepend to session array so it appears first
-        $items = $request->session()->get('information_diary', []);
-        array_unshift($items, $data);
-        $request->session()->put('information_diary', $items);
+        Information::create([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'content' => $validated['content'] ?? null,
+            'date' => $validated['date'] ?? null,
+            'category' => $validated['category'] ?? null,
+            'image_path' => $imagePath,
+            'created_by' => Auth::guard('petugas')->id(),
+        ]);
 
         return redirect()->route('information')->with('success', 'Informasi berhasil ditambahkan.');
     }

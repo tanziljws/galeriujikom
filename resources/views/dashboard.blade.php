@@ -36,7 +36,7 @@
                                 <strong>SMKN 4 Bogor</strong>
                             </div>
                             <p class="mb-0 text-rich" style="text-align: justify; line-height: 1.8;">
-                                SMKN 4 Bogor adalah Sekolah Menengah Kejuruan Negeri yang berlokasi di Jl. Raya Tajur, Kp. Buntar, Muarasari, Bogor Selatan. Berdiri sejak 2009 dan meraih akreditasi A pada 2018, sekolah ini dipimpin oleh <strong>Drs. Mulya Mulprihartono, M.Si</strong> sejak Juli 2020 dengan berbagai inovasi, seperti penggunaan <em>Learning Management System (LMS)</em>, kerjasama dengan dunia industri (IDUKA), serta penguatan praktik belajar. Berada di lahan seluas <strong>12.724 m²</strong>, SMKN 4 Bogor memiliki <strong>54 guru</strong> dan <strong>22 staf TU</strong>, serta fasilitas lengkap seperti laboratorium praktik, ruang kelas, aula, lapangan upacara, taman, akses internet satelit, dan listrik dari PLN & Diesel. Dengan sistem lima hari sekolah penuh, SMKN 4 Bogor berkomitmen mencetak lulusan yang kompeten, siap kerja, dan mampu bersaing di dunia industri.
+                                SMKN 4 Bogor adalah Sekolah Menengah Kejuruan Negeri yang berlokasi di Jl. Raya Tajur, Kp. Buntar, Muarasari, Bogor Selatan. Berdiri sejak 2009 dan meraih akreditasi A pada 2018, sekolah ini dipimpin oleh <strong>Drs. Mulya Mulprihartono, M.Si</strong> sejak Juli 2020 dengan berbagai inovasi, seperti penggunaan <em>Learning Management System (LMS)</em>, kerjasama dengan dunia industri (IDUKA), serta penguatan praktik belajar. Berada di lahan seluas <strong>12.724 m²</strong>, SMKN 4 Bogor memiliki <strong>54 guru</strong> dan <strong>24 staf TU</strong>, serta fasilitas lengkap seperti laboratorium praktik, ruang kelas, aula, lapangan upacara, taman, akses internet satelit, dan listrik dari PLN & Diesel. Dengan sistem lima hari sekolah penuh, SMKN 4 Bogor berkomitmen mencetak lulusan yang kompeten, siap kerja, dan mampu bersaing di dunia industri.
                             </p>
                         </div>
                     </div>
@@ -50,7 +50,7 @@
                                 </div>
                                 <div class="tile text-center">
                                     <div class="tile-icon"><i class="fas fa-users"></i></div>
-                                    <div class="tile-value">22</div>
+                                    <div class="tile-value">24</div>
                                     <div class="tile-label">Staf TU</div>
                                 </div>
                                 <div class="tile text-center">

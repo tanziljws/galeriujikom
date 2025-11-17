@@ -141,5 +141,77 @@
         "image": "https://via.placeholder.com/400x250/C0D6E8/FFFFFF?text=Pengembangan+Kerjasama+dengan+Industri",
         "is_featured": false,
         "created_at": "2025-10-21T13:45:49+07:00"
+    },
+    {
+        "id": "info_68fcb135555eb",
+        "title": "hwsujdkj",
+        "description": "prestasi adalah ini itu",
+        "content": "kapolsek os",
+        "date": "2025-10-25",
+        "category": "Prestasi",
+        "image": "http://127.0.0.1:8000/uploads/informations/info_68fcb13552f9a_WhatsApp_Image_2025-10-21_at_16.58.39__1_.jpeg",
+        "is_featured": false,
+        "created_at": "2025-10-25T18:15:01+07:00",
+        "created_by": "admin"
+    },
+    {
+        "id": "info_68fcb1a71aa98",
+        "title": "mnwkjjidw",
+        "description": "Akadmeikco",
+        "content": "mndjlfchecjnu8hjscBnuw",
+        "date": "2025-10-25",
+        "category": "Akademik",
+        "image": "http://127.0.0.1:8000/uploads/informations/info_68fcb1a719b5c_WhatsApp_Image_2025-10-21_at_17.12.49.jpeg",
+        "is_featured": false,
+        "created_at": "2025-10-25T18:16:55+07:00",
+        "created_by": "admin"
+    },
+    {
+        "id": "info_68fcb78607577",
+        "title": "mdwxmjldwx",
+        "description": "jldxlhuo;yjfjkfio",
+        "content": "hvxsgyiigxshoiajoxi",
+        "date": "2025-10-25",
+        "category": "Kerja Sama",
+        "image": "http://127.0.0.1:8000/uploads/informations/info_68fcb78605743_WhatsApp_Image_2025-10-15_at_16.55.14.jpeg",
+        "is_featured": false,
+        "created_at": "2025-10-25T18:41:58+07:00",
+        "created_by": "admin"
+    },
+    {
+        "id": "info_68fdd4da55fb4",
+        "title": "mihumihu",
+        "description": "njfdjksjifsiuoijrrj",
+        "content": "jogrfjo4r09548854",
+        "date": "2025-10-26",
+        "category": "Kerja Sama",
+        "image": "http://127.0.0.1:8000/uploads/informations/info_68fdd4da53dae_WhatsApp_Image_2025-10-02_at_23.27.59.jpeg",
+        "is_featured": false,
+        "created_at": "2025-10-26T14:59:22+07:00",
+        "created_by": "admin"
+    },
+    {
+        "id": "info_68fde7896a26b",
+        "title": "mahimahi",
+        "description": "Pendaftaran adalah ini itu",
+        "content": "iyoww",
+        "date": "2025-10-26",
+        "category": "Pendaftaran",
+        "image": "https://via.placeholder.com/800x450/7A9CC6/FFFFFF?text=Informasi",
+        "is_featured": false,
+        "created_at": "2025-10-26T16:19:05+07:00",
+        "created_by": "admin"
+    },
+    {
+        "id": "info_68fde7fbef444",
+        "title": "mnbvc",
+        "description": "yooi akademik",
+        "content": "bdhdjjd",
+        "date": "2024-10-12",
+        "category": "Akademikb",
+        "image": "http://127.0.0.1:8000/uploads/informations/info_68fde7fbed295_Tmall_Taobao____________________________________________________PNG__________________PSD_______________________________-_Pngtree.jpg",
+        "is_featured": false,
+        "created_at": "2025-10-26T16:20:59+07:00",
+        "created_by": "admin"
     }
 ]
