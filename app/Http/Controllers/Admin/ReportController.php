@@ -23,40 +23,48 @@ class ReportController extends Controller
             $totalUsers = User::count();
             $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get();
             
-            // Get photo statistics from database
-            $photos = GalleryItem::whereNotNull('filename')->get();
+            // Get photo statistics from database - use more efficient query
+            $photos = GalleryItem::whereNotNull('filename')->limit(100)->get();
             $photoReports = [];
+            
+            // Get all reactions grouped by photo_id for efficiency
+            $reactionsByPhoto = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
+                ->groupBy('photo_id', 'reaction')
+                ->get()
+                ->groupBy('photo_id');
+            
+            // Get all downloads grouped by photo_id
+            $downloadsByPhoto = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
+                ->groupBy('photo_id')
+                ->pluck('count', 'photo_id');
             
             foreach ($photos as $photo) {
                 try {
-                    $likes = PhotoReaction::where('photo_id', (string)$photo->id)
-                        ->where('reaction', 'like')
-                        ->count();
+                    $photoId = (string)$photo->id;
                     
-                    $dislikes = PhotoReaction::where('photo_id', (string)$photo->id)
-                        ->where('reaction', 'dislike')
-                        ->count();
-                    
-                    $downloads = DownloadLog::where('photo_id', (string)$photo->id)->count();
+                    $photoReactions = $reactionsByPhoto->get($photoId, collect());
+                    $likes = $photoReactions->where('reaction', 'like')->sum('count') ?? 0;
+                    $dislikes = $photoReactions->where('reaction', 'dislike')->sum('count') ?? 0;
+                    $downloads = $downloadsByPhoto->get($photoId, 0);
                     
                     $photoReports[] = [
                         'photo' => $photo,
                         'stats' => [
-                            'likes' => $likes,
-                            'dislikes' => $dislikes,
-                            'downloads' => $downloads
+                            'likes' => (int)$likes,
+                            'dislikes' => (int)$dislikes,
+                            'downloads' => (int)$downloads
                         ]
                     ];
                 } catch (\Exception $e) {
-                    \Log::error('Error processing photo stats: ' . $e->getMessage());
+                    \Log::error('Error processing photo stats for photo ID ' . $photo->id . ': ' . $e->getMessage());
                     continue;
                 }
             }
             
             // Sort by total interactions (likes + dislikes + downloads)
             usort($photoReports, function($a, $b) {
-                $totalA = $a['stats']['likes'] + $a['stats']['dislikes'] + $a['stats']['downloads'];
-                $totalB = $b['stats']['likes'] + $b['stats']['dislikes'] + $b['stats']['downloads'];
+                $totalA = ($a['stats']['likes'] ?? 0) + ($a['stats']['dislikes'] ?? 0) + ($a['stats']['downloads'] ?? 0);
+                $totalB = ($b['stats']['likes'] ?? 0) + ($b['stats']['dislikes'] ?? 0) + ($b['stats']['downloads'] ?? 0);
                 return $totalB - $totalA;
             });
             
@@ -70,9 +78,9 @@ class ReportController extends Controller
             \Log::error('Stack trace: ' . $e->getTraceAsString());
             return view('admin.reports.index', [
                 'totalUsers' => 0,
-                'recentUsers' => [],
+                'recentUsers' => collect(),
                 'photoReports' => []
-            ]);
+            ])->withErrors(['error' => 'Terjadi kesalahan saat memuat laporan.']);
         }
     }
     
@@ -127,32 +135,40 @@ class ReportController extends Controller
     public function photos()
     {
         try {
-            // Get all photos with stats from database
-            $photoReports = [];
+            // Get all photos with stats from database - use more efficient query
             $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get();
+            $photoReports = [];
+            
+            // Get all reactions grouped by photo_id for efficiency
+            $reactionsByPhoto = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
+                ->groupBy('photo_id', 'reaction')
+                ->get()
+                ->groupBy('photo_id');
+            
+            // Get all downloads grouped by photo_id
+            $downloadsByPhoto = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
+                ->groupBy('photo_id')
+                ->pluck('count', 'photo_id');
             
             foreach ($allPhotos as $photo) {
                 try {
-                    $likes = PhotoReaction::where('photo_id', (string)$photo->id)
-                        ->where('reaction', 'like')
-                        ->count();
+                    $photoId = (string)$photo->id;
                     
-                    $dislikes = PhotoReaction::where('photo_id', (string)$photo->id)
-                        ->where('reaction', 'dislike')
-                        ->count();
-                    
-                    $downloads = DownloadLog::where('photo_id', (string)$photo->id)->count();
+                    $photoReactions = $reactionsByPhoto->get($photoId, collect());
+                    $likes = $photoReactions->where('reaction', 'like')->sum('count') ?? 0;
+                    $dislikes = $photoReactions->where('reaction', 'dislike')->sum('count') ?? 0;
+                    $downloads = $downloadsByPhoto->get($photoId, 0);
                     
                     $photoReports[] = [
                         'photo' => $photo,
                         'stats' => [
-                            'likes' => $likes,
-                            'dislikes' => $dislikes,
-                            'downloads' => $downloads
+                            'likes' => (int)$likes,
+                            'dislikes' => (int)$dislikes,
+                            'downloads' => (int)$downloads
                         ]
                     ];
                 } catch (\Exception $e) {
-                    \Log::error('Error processing photo stats: ' . $e->getMessage());
+                    \Log::error('Error processing photo stats for photo ID ' . $photo->id . ': ' . $e->getMessage());
                     continue;
                 }
             }
@@ -165,7 +181,7 @@ class ReportController extends Controller
             \Log::error('Stack trace: ' . $e->getTraceAsString());
             return view('admin.reports.photos', [
                 'photoReports' => []
-            ]);
+            ])->withErrors(['error' => 'Terjadi kesalahan saat memuat laporan foto.']);
         }
     }
     
