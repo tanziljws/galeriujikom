@@ -614,29 +614,30 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
     // Gallery (Admin) using DB
     Route::get('/gallery', function(){
         try {
-        $items = \App\Models\GalleryItem::query()
+            $items = \App\Models\GalleryItem::query()
                 ->select(['title','category', \Illuminate\Support\Facades\DB::raw('MAX(created_at) as latest_at'), \Illuminate\Support\Facades\DB::raw('COUNT(*) as photo_count')])
                 ->whereNotNull('filename')
-            ->groupBy('title','category')
-            ->orderByDesc('latest_at')
-            ->get();
-        // Build array compatible with current admin view index
-        $mapped = $items->map(function($g){
-            // pick one thumbnail
+                ->groupBy('title','category')
+                ->orderByDesc('latest_at')
+                ->get();
+            // Build array compatible with current admin view index
+            $mapped = $items->map(function($g){
+                // pick one thumbnail
                 $thumb = \App\Models\GalleryItem::where('title',$g->title)->whereNotNull('filename')->latest('created_at')->first();
-            $url = $thumb? ($thumb->filename ? asset('uploads/gallery/'.$thumb->filename) : '') : '';
-            return [
-                'filename' => urlencode($g->title), // used as identifier in routes
-                'url' => $url,
-                'category' => $g->category ?? 'Lainnya',
-                'uploaded_at' => optional($g->latest_at)->toDateTimeString(),
-                'photo_count' => (int)$g->photo_count,
-                'title' => $g->title,
-            ];
-        })->toArray();
-        return view('admin.gallery.index', ['items' => $mapped]);
+                $url = $thumb? ($thumb->filename ? asset('uploads/gallery/'.$thumb->filename) : '') : '';
+                return [
+                    'filename' => urlencode($g->title), // used as identifier in routes
+                    'url' => $url,
+                    'category' => $g->category ?? 'Lainnya',
+                    'uploaded_at' => optional($g->latest_at)->toDateTimeString(),
+                    'photo_count' => (int)$g->photo_count,
+                    'title' => $g->title,
+                ];
+            })->toArray();
+            return view('admin.gallery.index', ['items' => $mapped]);
         } catch (\Exception $e) {
             \Log::error('Admin gallery index error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
             return view('admin.gallery.index', ['items' => []]);
         }
     })->name('gallery.index');
