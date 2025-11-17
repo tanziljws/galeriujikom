@@ -4,7 +4,6 @@
 
 @push('styles')
 <style>
-<<<<<<< HEAD
     /* Category Filter Buttons */
     .btn-outline-secondary {
         color: #1E3A8A !important;
@@ -21,8 +20,6 @@
         font-weight: 600 !important;
     }
     
-=======
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
     .gallery-actions {
         display: flex;
         justify-content: space-between;

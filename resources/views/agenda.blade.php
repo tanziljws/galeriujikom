@@ -13,7 +13,6 @@
         </div>
     </section>
 
-<<<<<<< HEAD
     <!-- Grid Section -->
     <section class="py-4">
         <div class="container">
@@ -44,9 +43,9 @@
                         @endphp
                         <div class="col-12 col-md-6 col-lg-4">
                             <div class="card h-100 shadow-sm border-0 rounded-4 hoverable">
-                                @if(!empty($it['poster_url']))
+                                @if(!empty($it['poster_path']))
                                     <div class="ratio ratio-16x9">
-                                        <img src="{{ $it['poster_url'] }}" alt="{{ $it['title'] ?? '' }}" style="object-fit:cover; border-radius: 1rem 1rem 0 0;">
+                                        <img src="{{ asset('uploads/agendas/'.$it['poster_path']) }}" alt="{{ $it['title'] ?? '' }}" style="object-fit:cover; border-radius: 1rem 1rem 0 0;">
                                     </div>
                                 @endif
                                 <div class="card-body p-3">
@@ -64,113 +63,11 @@
                                         <p class="text-secondary small mb-3 fw-semibold" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $it['description'] }}</p>
                                     @endif
                                     <a href="{{ route('agenda.show', $it['id']) }}" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold w-100">Baca Selengkapnya</a>
-=======
-    <!-- Timeline Section (match Gallery container style) -->
-    <section class="py-4">
-        <div class="container section-soft accented decor-gradient-top p-3 p-md-4">
-            <div class="timeline-vertical position-relative">
-                <span class="timeline-line d-none d-md-block"></span>
-
-                @if(!empty($items))
-                    @foreach($items as $i => $it)
-                        @php
-                            $dateStr = $it['date'] ?? null;
-                            try { $dateLabel = $dateStr ? \Carbon\Carbon::parse($dateStr)->translatedFormat('d F Y') : null; }
-                            catch (\Exception $e) { $dateLabel = $dateStr; }
-                            $collapseId = 'agenda-more-'.$i;
-                        @endphp
-                        <div class="timeline-item reveal">
-                            <div class="timeline-marker">
-                                <!-- Calendar Icon -->
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <rect x="3" y="5" width="18" height="16" rx="2" stroke="#1E3A8A" stroke-width="1.5"/>
-                                    <path d="M3 9H21" stroke="#1E3A8A" stroke-width="1.5"/>
-                                    <path d="M8 3V7" stroke="#1E3A8A" stroke-width="1.5"/>
-                                    <path d="M16 3V7" stroke="#1E3A8A" stroke-width="1.5"/>
-                                </svg>
-                            </div>
-                            <div class="card agenda-card shadow-sm border-0 rounded-4 hoverable">
-                                <div class="card-body p-3">
-                                    <div class="d-flex flex-wrap align-items-start gap-2">
-                                        <div class="badge-date text-nowrap">
-                                            {{ $dateLabel ?? '-' }}
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h3 class="h5 fw-bold mb-1" style="color:#1E3A8A;">{{ $it['title'] ?? 'Tanpa Judul' }}</h3>
-                                            @if(!empty($it['place']))
-                                                <div class="small text-secondary mb-2 d-flex align-items-center gap-2">
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2C8.686 2 6 4.686 6 8c0 5 6 14 6 14s6-9 6-14c0-3.314-2.686-6-6-6zm0 8.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="#1E3A8A"/></svg>
-                                                    <span>{{ $it['place'] }}</span>
-                                                </div>
-                                            @endif
-                                            @if(!empty($it['description']))
-                                                <p class="text-secondary mb-3 clamp-2">{{ $it['description'] }}</p>
-                                            @endif
-
-                                            <div class="d-flex align-items-center gap-2">
-                                                <a class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold btn-ghost" data-bs-toggle="collapse" href="#{{ $collapseId }}" role="button" aria-expanded="false" aria-controls="{{ $collapseId }}">
-                                                    Baca Selengkapnya
-                                                </a>
-                                                @if(!empty($it['poster_url']))
-                                                    <a href="{{ $it['poster_url'] }}" target="_blank" class="btn btn-sm btn-link text-decoration-none" style="color:#1E3A8A;">Lihat Poster</a>
-                                                @endif
-                                            </div>
-
-                                            <div class="collapse mt-2" id="{{ $collapseId }}">
-                                                <div class="p-3 rounded-3 bg-light-subtle info-highlight">
-                                                    <div class="row g-3 align-items-start">
-                                                        @if(!empty($it['poster_url']))
-                                                            <div class="col-md-3 d-none d-md-block">
-                                                                <div class="detail-poster shadow-sm rounded-2 overflow-hidden">
-                                                                    <img src="{{ $it['poster_url'] }}" alt="Poster {{ $it['title'] ?? '' }}">
-                                                                </div>
-                                                            </div>
-                                                        @endif
-                                                        <div class="col">
-                                                            @php
-                                                                $dateDetail = null;
-                                                                if(!empty($it['date'])){
-                                                                    try { $dateDetail = \Carbon\Carbon::parse($it['date'])->translatedFormat('l, d F Y'); } catch (\Exception $e) { $dateDetail = $it['date']; }
-                                                                }
-                                                            @endphp
-                                                            <div class="small text-muted mb-2 d-flex flex-wrap gap-2">
-                                                                @if($dateDetail)
-                                                                    <span class="badge rounded-pill bg-white border text-muted"><i class="ri-time-line me-1"></i>{{ $dateDetail }}</span>
-                                                                @endif
-                                                                @if(!empty($it['place']))
-                                                                    <span class="badge rounded-pill bg-white border text-muted"><i class="ri-map-pin-line me-1"></i>{{ $it['place'] }}</span>
-                                                                @endif
-                                                            </div>
-
-                                                            @if(!empty($it['description']))
-                                                                <div class="mb-2 small text-secondary">{{ $it['description'] }}</div>
-                                                            @endif
-
-                                                            <ul class="list-unstyled detail-list small mb-0">
-                                                                @if(!empty($it['created_by']))
-                                                                    <li><span>Diunggah oleh</span><strong>{{ $it['created_by'] }}</strong></li>
-                                                                @endif
-                                                                @if(!empty($it['created_at']))
-                                                                    <li><span>Dibuat</span><strong>{{ \Carbon\Carbon::parse($it['created_at'])->translatedFormat('d F Y, H:i') }}</strong></li>
-                                                                @endif
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @if(!empty($it['poster_url']))
-                                            <div class="ms-auto ms-md-0">
-                                                <img src="{{ $it['poster_url'] }}" alt="Poster {{ $it['title'] ?? '' }}" class="rounded-3" style="width:120px; height:80px; object-fit:cover; box-shadow: 0 6px 14px rgba(30,58,138,.15);">
-                                            </div>
-                                        @endif
-                                    </div>
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                                 </div>
                             </div>
                         </div>
                     @endforeach
-<<<<<<< HEAD
+                </div>
             @else
                 <div class="text-center py-5">
                     <div class="d-inline-block p-3 rounded-circle" style="background:#E2E8F0; box-shadow: inset 0 0 0 2px #cbd5e1;">
@@ -185,23 +82,6 @@
                     <p class="text-secondary mb-0">Agenda akan ditampilkan di sini setelah ditambahkan oleh admin.</p>
                 </div>
             @endif
-=======
-                @else
-                    <div class="text-center py-5">
-                        <div class="d-inline-block p-3 rounded-circle" style="background:#E2E8F0; box-shadow: inset 0 0 0 2px #cbd5e1;">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <rect x="3" y="5" width="18" height="16" rx="2" stroke="#1E3A8A" stroke-width="1.5"/>
-                                <path d="M3 9H21" stroke="#1E3A8A" stroke-width="1.5"/>
-                                <path d="M8 3V7" stroke="#1E3A8A" stroke-width="1.5"/>
-                                <path d="M16 3V7" stroke="#1E3A8A" stroke-width="1.5"/>
-                            </svg>
-                        </div>
-                        <h2 class="h5 mt-3 mb-1" style="color:#1E3A8A;">Belum ada agenda</h2>
-                        <p class="text-secondary mb-0">Agenda akan ditampilkan di sini setelah ditambahkan oleh admin.</p>
-                    </div>
-                @endif
-            </div>
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         </div>
     </section>
     @push('styles')

@@ -115,7 +115,6 @@
                             <i class="fas fa-calendar-alt me-1"></i>Agenda
                         </a>
                     </li>
-<<<<<<< HEAD
                     
                     @auth
                         <li class="nav-item dropdown">
@@ -147,8 +146,6 @@
                             </a>
                         </li>
                     @endauth
-=======
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 </ul>
             </div>
         </div>
