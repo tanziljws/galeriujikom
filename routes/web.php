@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InformationController;
-<<<<<<< HEAD
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\DownloadLogController;
 use App\Http\Controllers\Auth\AuthController;
@@ -21,18 +20,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-=======
-use App\Http\Controllers\DownloadLogController;
-use App\Models\DownloadLog;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/information', [InformationController::class, 'index'])->name('information');
 Route::get('/information/{id}', [InformationController::class, 'show'])->name('information.show');
 Route::post('/information', [InformationController::class, 'store'])->name('information.store');
-<<<<<<< HEAD
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
 Route::get('/gallery/album/{title}', [GalleryController::class, 'showAlbum'])->name('gallery.album');
 Route::get('/agenda', function () {
@@ -62,289 +54,61 @@ Route::get('/gallery/comments/{photoId}', [GalleryController::class, 'getComment
 // Gallery interactions - Require authentication (DB backed)
 Route::post('/gallery/react', [GalleryController::class, 'reactToPhoto'])->middleware('auth')->name('gallery.react');
 Route::post('/gallery/comment', [GalleryController::class, 'addComment'])->middleware('auth')->name('gallery.comment');
-    // Gallery download
-    Route::get('/gallery/download', function (Request $request) {
-        $request->validate([
-            'photo_id' => 'required|string',
-            'filename' => 'required|string'
-        ]);
-        
-        // Get the filename directly
-        $filename = $request->input('filename');
-        
-        // Get file path (assuming photos are in public/uploads/gallery)
-        $filePath = public_path('uploads/gallery/' . $filename);
-        
-        // Check if file exists
-        if (!file_exists($filePath)) {
-            abort(404, 'File tidak ditemukan');
-        }
-        
-        // Get file extension and set proper MIME type
-        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        $mimeTypes = [
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'png' => 'image/png',
-            'gif' => 'image/gif',
-            'webp' => 'image/webp',
-        ];
-        
-        $mimeType = $mimeTypes[$extension] ?? 'image/jpeg';
-        
-        // Log the download
-        if (class_exists(DownloadLogController::class)) {
-            try {
-                app(DownloadLogController::class)->store($request);
-            } catch (\Exception $e) {
-                // Ignore log errors
-            }
-        }
-        
-        // Clean filename for download (remove prefix)
-        $cleanFilename = preg_replace('/^img_[a-f0-9]+_/i', '', $filename);
-        
-        // Return file with proper headers
-        return response()->file($filePath, [
-            'Content-Type' => $mimeType,
-            'Content-Disposition' => 'attachment; filename="' . $cleanFilename . '"',
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
-            'Pragma' => 'no-cache',
-            'Expires' => '0'
-        ]);
-    })->name('gallery.download');
-
-    // Gallery download log -> controller (simpan ke DB)
-    Route::post('/gallery/download-log', [DownloadLogController::class, 'store'])->name('gallery.download_log');
-=======
-Route::get('/gallery', function () {
-    $dir = public_path('uploads/gallery');
-    $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-    $items = [];
-    $activeCategory = request('category');
-    if (is_file($manifestPath)) {
-        $json = file_get_contents($manifestPath);
-        $items = json_decode($json, true) ?: [];
-        // Ensure URL and fallback
-        foreach ($items as &$it) {
-            if (empty($it['url']) && !empty($it['filename'])) {
-                $it['url'] = asset('uploads/gallery/' . $it['filename']);
-            }
-        }
-        unset($it);
-        // Latest first
-        usort($items, function ($a, $b) {
-            return strcmp($b['uploaded_at'] ?? '', $a['uploaded_at'] ?? '');
-        });
-    } else {
-        // Fallback: scan directory only
-        if (is_dir($dir)) {
-            $files = glob($dir . '/*.{jpg,jpeg,png,gif,webp}', GLOB_BRACE);
-            foreach ($files as $file) {
-                $basename = basename($file);
-                $items[] = [
-                    'title' => pathinfo($basename, PATHINFO_FILENAME),
-                    'category' => 'Lainnya',
-                    'caption' => '',
-                    'filename' => $basename,
-                    'url' => asset('uploads/gallery/' . $basename),
-                    'uploaded_at' => date('c', filemtime($file)),
-                ];
-            }
-        }
-    }
-    // Normalize categories: trim, collapse spaces, title-case (treat variations as one)
-    $normalize = function($s){
-        $s = is_string($s) ? $s : '';
-        $s = preg_replace('/\s+/', ' ', trim($s));
-        $lower = mb_strtolower($s);
-        $title = implode(' ', array_map(function($w){ return mb_strtoupper(mb_substr($w,0,1)).mb_substr($w,1); }, explode(' ', $lower)));
-        return $title !== '' ? $title : 'Lainnya';
-    };
-    // Map fine-grained categories to umbrella groups
-    $groupOf = function($cat) use ($normalize){
-        $c = mb_strtolower($normalize($cat));
-        // Umbrella: Kegiatan Sekolah
-        if (preg_match('/\b(pensi|transforkrab|montour|mon\s*tour|upacara|rapat|workshop|latgab|lomba|fest|festival|tekir|tekiro|penglepas|pelepasan|gawai|mi\'?raj|mi\s*raj)\b/u', $c)) {
-            return 'Kegiatan Sekolah';
-        }
-        // Umbrella: Prestasi
-        if (preg_match('/\b(prestasi|penghargaan|juara)\b/u', $c)) {
-            return 'Prestasi';
-        }
-        // Umbrella: Jurusan (tambahkan keyword jurusan populer jika perlu)
-        if (preg_match('/\b(jurusan|tkj|rpl|dkv|akuntansi|perhotelan|otomotif|mesin|kimia|farmasi)\b/u', $c)) {
-            return 'Jurusan';
-        }
-        // Umbrella: Akademik
-        if (preg_match('/\b(akademik|ujian|try\s*out|ulangan|penilaian)\b/u', $c)) {
-            return 'Akademik';
-        }
-        // Default: kelompokkan ke Kegiatan Sekolah agar hanya kategori payung yang tampil
-        return 'Kegiatan Sekolah';
-    };
-    // Preserve original fine category as subcategory, and store umbrella as group
-    foreach ($items as &$it) {
-        $raw = $normalize($it['category'] ?? '');
-        $it['subcategory'] = $raw !== '' ? $raw : 'Lainnya';
-        $it['group'] = $groupOf($raw);
-        // Keep backward compatibility: show group in category for older views
-        $it['category'] = $it['group'];
-    }
-    unset($it);
-    // Build unique groups (umbrella categories)
-    $groups = array_values(array_unique(array_map(function ($it) { return $it['group'] ?? 'Lainnya'; }, $items)));
-    // Preferred order for umbrella categories
-    $preferred = ['Kegiatan Sekolah','Prestasi','Jurusan','Akademik','Lainnya'];
-    $catsSet = array_flip($groups);
-    $ordered = [];
-    foreach($preferred as $p){ if(isset($catsSet[$p])){ $ordered[]=$p; unset($catsSet[$p]); } }
-    // Append remaining categories alphabetically
-    $rest = array_keys($catsSet);
-    sort($rest);
-    $groups = array_merge($ordered, $rest);
-    // Filter by category if requested
-    if ($activeCategory && $activeCategory !== '*') {
-        $norm = $normalize($activeCategory);
-        $asGroup = $groupOf($activeCategory);
-        $isFilteringGroup = in_array($norm, $groups, true) || in_array($asGroup, $groups, true);
-        if ($isFilteringGroup) {
-            $target = in_array($norm, $groups, true) ? $norm : $asGroup;
-            $items = array_values(array_filter($items, function ($it) use ($target) {
-                return ($it['group'] ?? 'Lainnya') === $target;
-            }));
-            $activeCategory = $target;
-        } else {
-            // treat as subcategory filter
-            $items = array_values(array_filter($items, function ($it) use ($norm) {
-                return ($it['subcategory'] ?? 'Lainnya') === $norm;
-            }));
-            $activeCategory = $norm;
-        }
-    }
-    return view('gallery', [
-        'items' => $items,
-        'groups' => $groups,
-        'activeCategory' => $activeCategory
-    ]);
-})->name('gallery');
-Route::get('/agenda', function () {
-    $dir = public_path('uploads/agendas');
-    $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-    $items = [];
-    if (is_file($manifestPath)) {
-        $items = json_decode(file_get_contents($manifestPath), true) ?: [];
-        usort($items, function ($a, $b) {
-            return strcmp($a['date'] ?? '', $b['date'] ?? '');
-        });
-    }
-    return view('agenda', ['items' => $items]);
-})->name('agenda');
-
-// Gallery interactions (public endpoints, JSON storage)
-Route::get('/gallery/stats/{filename}', function ($filename) {
-    $dir = public_path('uploads/gallery');
-    $reactionsPath = $dir . DIRECTORY_SEPARATOR . 'reactions.json';
-    $commentsPath = $dir . DIRECTORY_SEPARATOR . 'comments.json';
-    $reactions = is_file($reactionsPath) ? json_decode(file_get_contents($reactionsPath), true) : [];
-    $comments = is_file($commentsPath) ? json_decode(file_get_contents($commentsPath), true) : [];
-    $r = collect($reactions)->firstWhere('filename', $filename) ?: ['filename'=>$filename,'likes'=>0,'dislikes'=>0];
-    $c = array_values(array_filter($comments, function($it) use ($filename){
-        if (($it['filename'] ?? '') !== $filename) return false;
-        return ($it['status'] ?? 'approved') === 'approved';
-    }));
-    usort($c, fn($a,$b)=>strcmp($b['created_at']??'', $a['created_at']??''));
-    return response()->json(['likes'=>$r['likes']??0,'dislikes'=>$r['dislikes']??0,'comments'=>$c]);
-})->name('gallery.stats');
-
-Route::post('/gallery/react', function (Request $request) {
-    $validated = $request->validate([
-        'filename' => ['required','string'],
-        'type' => ['required','in:like,dislike,clear']
-    ]);
-    $dir = public_path('uploads/gallery');
-    if (!is_dir($dir)) { @mkdir($dir,0755,true); }
-    $path = $dir . DIRECTORY_SEPARATOR . 'reactions.json';
-    $items = is_file($path) ? json_decode(file_get_contents($path), true) : [];
-    $ip = $request->ip();
-    $idx = null;
-    foreach ($items as $i=>$it){ if(($it['filename']??'')===$validated['filename']){ $idx=$i; break; } }
-    if ($idx===null){
-        $items[] = ['filename'=>$validated['filename'],'likes'=>0,'dislikes'=>0,'by_ip'=>[],'updated_at'=>date('c')];
-        $idx = count($items)-1;
-    }
-    $entry = $items[$idx];
-    $prev = $entry['by_ip'][$ip] ?? null;
-    // remove previous reaction from counts
-    if ($prev==='like'){ $entry['likes']=max(0, ($entry['likes']??0)-1); }
-    if ($prev==='dislike'){ $entry['dislikes']=max(0, ($entry['dislikes']??0)-1); }
-    if ($validated['type']==='clear'){
-        unset($entry['by_ip'][$ip]);
-    } else {
-        $entry['by_ip'][$ip] = $validated['type'];
-        if ($validated['type']==='like'){ $entry['likes']=($entry['likes']??0)+1; }
-        if ($validated['type']==='dislike'){ $entry['dislikes']=($entry['dislikes']??0)+1; }
-    }
-    $entry['updated_at']=date('c');
-    $items[$idx]=$entry;
-    file_put_contents($path, json_encode($items, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
-    return response()->json(['likes'=>$entry['likes'],'dislikes'=>$entry['dislikes'],'your_reaction'=>$entry['by_ip'][$ip]??null]);
-})->name('gallery.react');
-
-Route::post('/gallery/comment', function (Request $request) {
-    $validated = $request->validate([
-        'filename' => ['required','string'],
-        'name' => ['nullable','string','max:60'],
-        'message' => ['required','string','max:400']
-    ]);
-    $dir = public_path('uploads/gallery');
-    if (!is_dir($dir)) { @mkdir($dir,0755,true); }
-    $path = $dir . DIRECTORY_SEPARATOR . 'comments.json';
-    $items = is_file($path) ? json_decode(file_get_contents($path), true) : [];
-    $items[] = [
-        'id' => uniqid('c_'),
-        'filename' => $validated['filename'],
-        'name' => $validated['name'] ?: 'Anonim',
-        'message' => $validated['message'],
-        'ip' => $request->ip(),
-        'created_at' => date('c'),
-        'status' => 'pending'
-    ];
-    file_put_contents($path, json_encode($items, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
-    return response()->json(['status'=>'ok']);
-})->name('gallery.comment');
 
 // Gallery download
 Route::get('/gallery/download', function (Request $request) {
     $request->validate([
         'photo_id' => 'required|string',
-        'photo_url' => 'required|url'
+        'filename' => 'required|string'
     ]);
+    
+    // Get the filename directly
+    $filename = $request->input('filename');
+    
+    // Get file path (assuming photos are in public/uploads/gallery)
+    $filePath = public_path('uploads/gallery/' . $filename);
+    
+    // Check if file exists
+    if (!file_exists($filePath)) {
+        abort(404, 'File tidak ditemukan');
+    }
+    
+    // Get file extension and set proper MIME type
+    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    $mimeTypes = [
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'gif' => 'image/gif',
+        'webp' => 'image/webp',
+    ];
+    
+    $mimeType = $mimeTypes[$extension] ?? 'image/jpeg';
     
     // Log the download
     if (class_exists(DownloadLogController::class)) {
-        app(DownloadLogController::class)->store($request);
+        try {
+            app(DownloadLogController::class)->store($request);
+        } catch (\Exception $e) {
+            // Ignore log errors
+        }
     }
     
-    // Get the filename from URL
-    $url = $request->input('photo_url');
-    $filename = basename(parse_url($url, PHP_URL_PATH));
+    // Clean filename for download (remove prefix)
+    $cleanFilename = preg_replace('/^img_[a-f0-9]+_/i', '', $filename);
     
-    // Set headers for download
-    $headers = [
-        'Content-Type' => 'application/octet-stream',
-        'Content-Disposition' => 'attachment; filename="' . $filename . '"'
-    ];
-    
-    // Return the file for download
-    return response()->streamDownload(function () use ($url) {
-        echo file_get_contents($url);
-    }, $filename, $headers);
+    // Return file with proper headers
+    return response()->file($filePath, [
+        'Content-Type' => $mimeType,
+        'Content-Disposition' => 'attachment; filename="' . $cleanFilename . '"',
+        'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        'Pragma' => 'no-cache',
+        'Expires' => '0'
+    ]);
 })->name('gallery.download');
 
 // Gallery download log -> controller (simpan ke DB)
 Route::post('/gallery/download-log', [DownloadLogController::class, 'store'])->name('gallery.download_log');
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 
 // Guru & Staf (public)
 Route::get('/guru-staf', function () {
@@ -380,14 +144,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         ->middleware('auth:petugas')->name('logout');
 });
 
-<<<<<<< HEAD
-=======
-// Provide a default 'login' route name for Laravel's auth redirects, pointing to admin login
-Route::get('/login', function(){
-    return redirect()->route('admin.login');
-})->name('login');
-
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 // Admin routes (protected)
 Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(function () {
     // Root admin menuju Dashboard
@@ -449,35 +205,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
             $galleryCount = \App\Models\GalleryItem::whereDate('created_at', $date)->count();
             $activityData[] = $infoCount + $agendaCount + $galleryCount;
         }
-=======
-        // Hitung jumlah informasi
-        $infoDir = public_path('uploads/informations');
-        $infoManifest = $infoDir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $informations = is_file($infoManifest) ? (json_decode(file_get_contents($infoManifest), true) ?: []) : [];
-
-        // Hitung jumlah agenda
-        $agendaDir = public_path('uploads/agendas');
-        $agendaManifest = $agendaDir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $agendas = is_file($agendaManifest) ? (json_decode(file_get_contents($agendaManifest), true) ?: []) : [];
-
-        // Hitung jumlah foto galeri
-        $galleryDir = public_path('uploads/gallery');
-        $galleryManifest = $galleryDir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $gallery = is_file($galleryManifest) ? (json_decode(file_get_contents($galleryManifest), true) ?: []) : [];
-
-        // Ambil 5 terbaru masing-masing
-        $latestInfo = $informations;
-        usort($latestInfo, function($a,$b){ return strcmp($b['created_at'] ?? '', $a['created_at'] ?? ''); });
-        $latestInfo = array_slice($latestInfo, 0, 5);
-
-        $latestAgendas = $agendas;
-        usort($latestAgendas, function($a,$b){ return strcmp($b['date'] ?? '', $a['date'] ?? ''); });
-        $latestAgendas = array_slice($latestAgendas, 0, 5);
-
-        $latestGallery = $gallery;
-        usort($latestGallery, function($a,$b){ return strcmp($b['uploaded_at'] ?? '', $a['uploaded_at'] ?? ''); });
-        $latestGallery = array_slice($latestGallery, 0, 8);
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 
         // Ringkasan Guru & Staf (scan 3 folder)
         $gsTypes = ['guru','staf','kepala-sekolah'];
@@ -504,24 +231,15 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         $latestGuruStaf = array_slice($gsItems, 0, 8);
 
         return view('admin.dashboard', [
-<<<<<<< HEAD
             'countInfo' => $countInfo,
             'countAgenda' => $countAgenda,
             'countGallery' => $countGallery,
-=======
-            'countInfo' => count($informations),
-            'countAgenda' => count($agendas),
-            'countGallery' => count($gallery),
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
             'countGuruStaf' => $gsCount,
             'latestInfo' => $latestInfo,
             'latestAgendas' => $latestAgendas,
             'latestGallery' => $latestGallery,
             'latestGuruStaf' => $latestGuruStaf,
-<<<<<<< HEAD
             'activityData' => $activityData,
-=======
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         ]);
     })->name('dashboard');
 
@@ -563,24 +281,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         $items = array_values(array_filter($items, function($it){ return isset($it['created_by']); }));
 
         if (!is_dir($dir)) { @mkdir($dir, 0755, true); }
-=======
-        $dir = public_path('uploads/informations');
-        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $items = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
-        // Bootstrap from seeds if empty
-        if (empty($items)) {
-            if (!is_dir($dir)) { @mkdir($dir, 0755, true); }
-            // Pull seeds from controller
-            $seeds = app(\App\Http\Controllers\InformationController::class)->getSeedInformations();
-            // Normalize IDs to strings and add created_at; keep image as-is (placeholder URLs)
-            $items = array_map(function($it){
-                $it['id'] = (string)($it['id'] ?? uniqid('info_'));
-                $it['created_at'] = date('c');
-                return $it;
-            }, $seeds);
-            file_put_contents($manifestPath, json_encode($items, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
-        }
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         // latest first
         usort($items, function($a,$b){ return strcmp($b['created_at'] ?? '', $a['created_at'] ?? ''); });
         return view('admin.posts.index', ['items' => $items]);
@@ -593,12 +293,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
         $items = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
         $item = collect($items)->firstWhere('id', $id);
-<<<<<<< HEAD
         // block seeded items without created_by
         abort_if(!$item || !isset($item['created_by']), 404);
-=======
-        abort_if(!$item, 404);
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         return view('admin.posts.show', compact('item'));
     })->name('posts.show');
 
@@ -607,12 +303,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
         $items = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
         $item = collect($items)->firstWhere('id', $id);
-<<<<<<< HEAD
         // block seeded items without created_by
         abort_if(!$item || !isset($item['created_by']), 404);
-=======
-        abort_if(!$item, 404);
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         return view('admin.posts.edit', compact('item'));
     })->name('posts.edit');
 
@@ -751,39 +443,15 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
     // Agendas (CRUD via Database)
     Route::get('/agendas', function () {
         $items = Agenda::orderByDesc('created_at')->get();
-=======
-    // Agendas (CRUD via manifest.json)
-    Route::get('/agendas', function () {
-        $dir = public_path('uploads/agendas');
-        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $items = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
-        usort($items, function ($a, $b) { return strcmp($a['date'] ?? '', $b['date'] ?? ''); });
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         return view('admin.agendas.index', ['items' => $items]);
     })->name('agendas.index');
     Route::view('/agendas/create', 'admin.agendas.create')->name('agendas.create');
     Route::get('/agendas/{id}', function ($id) {
-<<<<<<< HEAD
         $item = Agenda::findOrFail($id);
         return view('admin.agendas.show', compact('item'));
     })->name('agendas.show');
     Route::get('/agendas/{id}/edit', function ($id) {
         $item = Agenda::findOrFail($id);
-=======
-        $dir = public_path('uploads/agendas');
-        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $items = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
-        $item = collect($items)->firstWhere('id', $id);
-        abort_if(!$item, 404);
-        return view('admin.agendas.show', compact('item'));
-    })->name('agendas.show');
-    Route::get('/agendas/{id}/edit', function ($id) {
-        $dir = public_path('uploads/agendas');
-        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $items = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
-        $item = collect($items)->firstWhere('id', $id);
-        abort_if(!$item, 404);
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         return view('admin.agendas.edit', compact('item'));
     })->name('agendas.edit');
     Route::post('/agendas', function (Request $request) {
@@ -801,34 +469,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
             'description' => $validated['description'] ?? null,
             'created_by' => Auth::guard('petugas')->id(),
         ]);
-=======
-            'poster' => ['nullable','image','mimes:jpeg,png,jpg,webp,gif','max:5120'],
-        ]);
-        $dir = public_path('uploads/agendas');
-        if (!is_dir($dir)) { mkdir($dir, 0755, true); }
-        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $manifest = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
-        $posterFilename = null;
-        if ($request->hasFile('poster')) {
-            $file = $request->file('poster');
-            $safe = preg_replace('/[^A-Za-z0-9_\.-]/','_', $file->getClientOriginalName());
-            $posterFilename = uniqid('poster_') . '_' . $safe;
-            $file->move($dir, $posterFilename);
-        }
-        $id = uniqid('agenda_');
-        $manifest[] = [
-            'id' => $id,
-            'title' => $validated['title'],
-            'date' => $validated['date'],
-            'place' => $validated['place'] ?? '',
-            'description' => $validated['description'] ?? '',
-            'poster' => $posterFilename,
-            'poster_url' => $posterFilename ? asset('uploads/agendas/'.$posterFilename) : null,
-            'created_at' => date('c'),
-            'created_by' => Auth::guard('petugas')->user()->username ?? null,
-        ];
-        file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         return redirect()->route('admin.agendas.index')->with('status','Agenda berhasil ditambahkan.');
     })->name('agendas.store');
     Route::put('/agendas/{id}', function (Request $request, $id) {
@@ -1085,59 +725,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         return back()->with('status','Foto dihapus.');
     })->name('gallery.photo.destroy');
 
-=======
-            'poster' => ['nullable','image','mimes:jpeg,png,jpg,webp,gif','max:5120'],
-        ]);
-        $dir = public_path('uploads/agendas');
-        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $manifest = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
-        $index = null;
-        foreach ($manifest as $i => $it) { if (($it['id'] ?? '') === $id) { $index = $i; break; } }
-        abort_if($index === null, 404);
-        $current = $manifest[$index];
-        if ($request->hasFile('poster')) {
-            if (!is_dir($dir)) { mkdir($dir, 0755, true); }
-            if (!empty($current['poster'])) {
-                $old = $dir . DIRECTORY_SEPARATOR . $current['poster'];
-                if (is_file($old)) { @unlink($old); }
-            }
-            $file = $request->file('poster');
-            $safe = preg_replace('/[^A-Za-z0-9_\.-]/','_', $file->getClientOriginalName());
-            $posterFilename = uniqid('poster_') . '_' . $safe;
-            $file->move($dir, $posterFilename);
-            $current['poster'] = $posterFilename;
-            $current['poster_url'] = asset('uploads/agendas/'.$posterFilename);
-        }
-        $current['title'] = $validated['title'];
-        $current['date'] = $validated['date'];
-        $current['place'] = $validated['place'] ?? '';
-        $current['description'] = $validated['description'] ?? '';
-        $manifest[$index] = $current;
-        file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
-        return redirect()->route('admin.agendas.index')->with('status','Agenda berhasil diperbarui.');
-    })->name('agendas.update');
-    Route::delete('/agendas/{id}', function ($id) {
-        $dir = public_path('uploads/agendas');
-        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $manifest = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
-        $found = false;
-        foreach ($manifest as $i => $it) {
-            if (($it['id'] ?? '') === $id) {
-                if (!empty($it['poster'])) {
-                    $path = $dir . DIRECTORY_SEPARATOR . $it['poster'];
-                    if (is_file($path)) { @unlink($path); }
-                }
-                array_splice($manifest, $i, 1);
-                $found = true;
-                break;
-            }
-        }
-        if ($found) {
-            file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
-        }
-        return redirect()->route('admin.agendas.index')->with('status', $found ? 'Agenda berhasil dihapus.' : 'Agenda tidak ditemukan.');
-    })->name('agendas.destroy');
-
     // Gallery
     Route::get('/gallery', function () {
         $dir = public_path('uploads/gallery');
@@ -1391,52 +978,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         abort_if(!$item, 404);
         return view('admin.gallery.edit', compact('item'));
     })->name('gallery.edit');
-<<<<<<< HEAD
-    // Legacy JSON-based upload route removed (replaced by DB-based route above)
-=======
-    Route::post('/gallery', function (Request $request) {
-        $validated = $request->validate([
-            'title' => ['nullable', 'string', 'max:100'],
-            'category' => ['required', 'string', 'max:100'],
-            'caption' => ['nullable', 'string', 'max:255'],
-            'images' => ['required','array','min:1','max:50'],
-            'images.*' => ['required','image','mimes:jpeg,png,jpg,gif,webp','max:25600'], // 25MB per file
-        ]);
-
-        // Validate total size <= 200MB
-        $totalSize = 0;
-        foreach ($request->file('images') as $f) { $totalSize += $f->getSize(); }
-        if ($totalSize > 200 * 1024 * 1024) {
-            return back()->withErrors(['images' => 'Total ukuran semua file melebihi 200MB. Kurangi jumlah atau kompres foto.'])->withInput();
-        }
-
-        $uploadDir = public_path('uploads/gallery');
-        if (!is_dir($uploadDir)) { mkdir($uploadDir, 0755, true); }
-
-        // Append to manifest.json
-        $manifestPath = $uploadDir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $manifest = is_file($manifestPath) ? (json_decode(file_get_contents($manifestPath), true) ?: []) : [];
-
-        foreach ($request->file('images') as $file) {
-            $safeName = preg_replace('/[^A-Za-z0-9_\.-]/', '_', $file->getClientOriginalName());
-            $filename = uniqid('img_') . '_' . $safeName;
-            $file->move($uploadDir, $filename);
-            $manifest[] = [
-                'title' => $validated['title'] ?? '',
-                'category' => $validated['category'],
-                'caption' => $validated['caption'] ?? '',
-                'filename' => $filename,
-                'url' => asset('uploads/gallery/' . $filename),
-                'uploaded_at' => date('c'),
-                'created_by' => Auth::guard('petugas')->user()->username ?? null,
-            ];
-        }
-
-        file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
-
-        return redirect()->route('admin.gallery.index')->with('status', 'Foto berhasil diupload.');
-    })->name('gallery.store');
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 
     Route::put('/gallery/{filename}', function (Request $request, $filename) {
         $validated = $request->validate([
@@ -1711,6 +1252,4 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         Route::put('/users/{id}', [\App\Http\Controllers\Admin\ReportController::class, 'updateUser'])->name('users.update');
         Route::delete('/users/{id}', [\App\Http\Controllers\Admin\ReportController::class, 'destroyUser'])->name('users.destroy');
     });
-=======
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 });

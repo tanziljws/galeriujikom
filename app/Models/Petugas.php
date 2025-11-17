@@ -15,10 +15,7 @@ class Petugas extends Authenticatable
     protected $fillable = [
         'username',
         'password',
-<<<<<<< HEAD
         'role',
-=======
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
     ];
 
     protected $hidden = [
@@ -40,7 +37,6 @@ class Petugas extends Authenticatable
     public function agendas() {
         return $this->hasMany(Agenda::class);
     }
-<<<<<<< HEAD
     
     // Helper method untuk cek role
     public function isAdmin() {
@@ -50,6 +46,4 @@ class Petugas extends Authenticatable
     public function isGuest() {
         return $this->role === 'guest';
     }
-=======
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 }
