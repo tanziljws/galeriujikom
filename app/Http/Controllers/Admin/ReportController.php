@@ -43,9 +43,9 @@ class ReportController extends Controller
                     $photoId = (string)$photo->id;
                     
                     $photoReactions = $reactionsByPhoto->get($photoId, collect());
-                    $likes = $photoReactions->where('reaction', 'like')->sum('count') ?? 0;
-                    $dislikes = $photoReactions->where('reaction', 'dislike')->sum('count') ?? 0;
-                    $downloads = $downloadsByPhoto->get($photoId, 0);
+                    $likes = (int)($photoReactions->where('reaction', 'like')->sum('count') ?: 0);
+                    $dislikes = (int)($photoReactions->where('reaction', 'dislike')->sum('count') ?: 0);
+                    $downloads = (int)($downloadsByPhoto->get($photoId, 0) ?: 0);
                     
                     $photoReports[] = [
                         'photo' => $photo,
@@ -140,24 +140,52 @@ class ReportController extends Controller
             $photoReports = [];
             
             // Get all reactions grouped by photo_id for efficiency
-            $reactionsByPhoto = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
-                ->groupBy('photo_id', 'reaction')
-                ->get()
-                ->groupBy('photo_id');
+            $reactionsByPhoto = [];
+            try {
+                $reactionsData = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
+                    ->groupBy('photo_id', 'reaction')
+                    ->get();
+                foreach ($reactionsData as $r) {
+                    if (!isset($reactionsByPhoto[$r->photo_id])) {
+                        $reactionsByPhoto[$r->photo_id] = [];
+                    }
+                    $reactionsByPhoto[$r->photo_id][] = [
+                        'reaction' => $r->reaction,
+                        'count' => (int)$r->count
+                    ];
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error fetching reactions: ' . $e->getMessage());
+            }
             
             // Get all downloads grouped by photo_id
-            $downloadsByPhoto = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
-                ->groupBy('photo_id')
-                ->pluck('count', 'photo_id');
+            $downloadsByPhoto = [];
+            try {
+                $downloadsData = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
+                    ->groupBy('photo_id')
+                    ->get();
+                foreach ($downloadsData as $d) {
+                    $downloadsByPhoto[$d->photo_id] = (int)$d->count;
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error fetching downloads: ' . $e->getMessage());
+            }
             
             foreach ($allPhotos as $photo) {
                 try {
                     $photoId = (string)$photo->id;
                     
-                    $photoReactions = $reactionsByPhoto->get($photoId, collect());
-                    $likes = $photoReactions->where('reaction', 'like')->sum('count') ?? 0;
-                    $dislikes = $photoReactions->where('reaction', 'dislike')->sum('count') ?? 0;
-                    $downloads = $downloadsByPhoto->get($photoId, 0);
+                    $photoReactions = $reactionsByPhoto[$photoId] ?? [];
+                    $likes = 0;
+                    $dislikes = 0;
+                    foreach ($photoReactions as $r) {
+                        if ($r['reaction'] === 'like') {
+                            $likes += (int)$r['count'];
+                        } elseif ($r['reaction'] === 'dislike') {
+                            $dislikes += (int)$r['count'];
+                        }
+                    }
+                    $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
                     
                     $photoReports[] = [
                         'photo' => $photo,

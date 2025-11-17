@@ -71,27 +71,6 @@
                 </ul>
             </div>
         </div>
-        <div class="col-xl-4">
-            <div class="card p-3 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="mb-0">Kunjungan Saya</h5>
-                    <span class="badge bg-light text-dark">Minggu ini</span>
-                </div>
-                <div class="d-flex flex-wrap gap-3">
-                    @forelse(($radials ?? []) as $r)
-                        <div class="text-center">
-                            <div class="ring" style="--p:{{ (int)($r['value'] ?? 0) }}"><span>{{ (int)($r['value'] ?? 0) }}%</span></div>
-                            <div class="small mt-1">{{ $r['label'] ?? '-' }}</div>
-                            @if(isset($r['count']))
-                              <div class="small text-muted">views ({{ (int) $r['count'] }})</div>
-                            @endif
-                        </div>
-                    @empty
-                        <div class="text-muted small">Belum ada data minggu ini.</div>
-                    @endforelse
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="row g-3 mt-1">
