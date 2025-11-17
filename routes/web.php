@@ -153,7 +153,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
 
     // Dashboard ringkasan konten
     Route::get('/dashboard', function(){
-<<<<<<< HEAD
         // Hitung jumlah dari DB
         $countInfo = \App\Models\Information::count();
         $countAgenda = \App\Models\Agenda::count();
