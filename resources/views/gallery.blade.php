@@ -186,109 +186,6 @@
                             </span>
                         </div>
                     @endif
-                        
-
-            <!-- Filter Section -->
-            <div class="row mb-5">
-                <div class="col-12">
-                    <div class="filter-section">
-                        <h2 class="section-title mb-4">Galeri Foto</h2>
-                        
-                        <!-- Category Tabs -->
-                        <div class="category-tabs mb-4">
-                            @php
-                                $umbrellaCategories = json_decode(file_get_contents(resource_path('data/umbrella_categories.json')), true);
-                                $activeCategory = request('category');
-                                
-                                // Get all subcategories in a flat array
-                                $allSubcategories = [];
-                                foreach ($umbrellaCategories as $subcategories) {
-                                    $allSubcategories = array_merge($allSubcategories, $subcategories);
-                                }
-                                
-                                // Check if active category is a subcategory
-                                $isSubcategoryActive = in_array($activeCategory, $allSubcategories);
-                                $activeUmbrella = '';
-                                
-                                // Find which umbrella the active subcategory belongs to
-                                if ($isSubcategoryActive) {
-                                    foreach ($umbrellaCategories as $umbrella => $subcats) {
-                                        if (in_array($activeCategory, $subcats)) {
-                                            $activeUmbrella = $umbrella;
-                                            break;
-                                        }
-                                    }
-                                }
-                            @endphp
-                            
-                            <div class="d-flex flex-wrap align-items-center gap-3">
-                                <!-- All Button -->
-                                <button type="button" 
-                                        class="filter-tab {{ !$activeCategory ? 'active' : '' }}"
-                                        data-category="">
-                                    Semua
-                                </button>
-                                
-                                <!-- Umbrella Categories -->
-                                @foreach($umbrellaCategories as $umbrella => $subcategories)
-                                    <div class="dropdown category-dropdown">
-                                        <button class="filter-tab dropdown-toggle {{ ($activeUmbrella === $umbrella || (!$isSubcategoryActive && $activeCategory === $umbrella)) ? 'active' : '' }}" 
-                                                type="button" 
-                                                id="dropdown-{{ Str::slug($umbrella) }}"
-                                                data-bs-toggle="dropdown" 
-                                                aria-expanded="false"
-                                                data-category="{{ $umbrella }}">
-                                            {{ $umbrella }}
-                                            <i class="fas fa-chevron-down ms-2"></i>
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="dropdown-{{ Str::slug($umbrella) }}">
-                                            @foreach($subcategories as $subcategory)
-                                                <li>
-                                                    <a class="dropdown-item subcategory-item {{ $activeCategory === $subcategory ? 'active' : '' }}" 
-                                                       href="#" 
-                                                       data-category="{{ $subcategory }}">
-                                                        {{ $subcategory }}
-                                                        @if($activeCategory === $subcategory)
-                                                            <i class="fas fa-check ms-2"></i>
-                                                        @endif
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                @endforeach
-                            </div>
-                            
-                            <!-- Active Category Indicator -->
-                            @if($activeCategory)
-                                <div class="active-category-indicator mt-3">
-                                    <span class="badge bg-primary">
-                                        {{ $activeCategory }}
-                                        <button class="btn-close-category" aria-label="Hapus filter">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </span>
-                                </div>
-                            @endif
-                        </div>
-                        
-                        <!-- Sort and Search -->
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="text" class="form-control" placeholder="Cari foto..." id="searchInput">
-                            </div>
-                            
-                            <div class="sort-dropdown">
-                                <select class="form-select" id="sortBy">
-                                    <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Terbaru</option>
-                                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Terlama</option>
-                                    <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>Paling Populer</option>
-                                </select>
-                                <i class="fas fa-sort"></i>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
             
@@ -502,7 +399,11 @@
                         max-width: 100%;
                     }
                 }
-                
+
+                /* Container Utama */
+                .gallery-container {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
                     gap: 24px;
                     padding: 24px 0;
                 }
@@ -746,15 +647,29 @@
                 #photoModal .modal-content {
                     background: rgba(255, 255, 255, 0.98);
                 }
-                        
-                        // Warna acak untuk badge kategori
-                        $badgeColors = ['#E74694', '#3F83F8', '#1A56DB', '#0694A2', '#0E9F6E', '#D03801'];
+            </style>
+
+            <!-- Gallery Grid -->
+            <div class="gallery-container" id="galleryGrid">
+                @php
+                    // Warna acak untuk badge kategori
+                    $badgeColors = ['#E74694', '#3F83F8', '#1A56DB', '#0694A2', '#0E9F6E', '#D03801'];
+                @endphp
+                
+                @forelse($albums as $album)
+                    @php
+                        $album = (array)$album;
+                        $thumbnail = $album['thumbnail'] ?? 'https://via.placeholder.com/500x500?text=Galeri+SMKN+4';
+                        $title = $album['title'] ?? 'Tanpa Judul';
+                        $photoCount = $album['photo_count'] ?? 1;
+                        $date = isset($album['uploaded_at']) ? \Carbon\Carbon::parse($album['uploaded_at'])->format('d F Y') : now()->format('d F Y');
+                        $category = $album['category'] ?? 'Umum';
                         $randomColor = $badgeColors[array_rand($badgeColors)];
                     @endphp
                     
                     <a href="{{ route('gallery.album', urlencode($title)) }}" class="gallery-item" data-category="{{ Str::slug($category) }}" style="text-decoration: none; color: inherit; background: rgba(255, 255, 255, 0.75) !important; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); border-radius: 20px; overflow: hidden; display: block;">
                         <div class="img-wrapper">
-                            <div class="category-badge">
+                            <div class="category-badge" style="background: {{ $randomColor }}">
                                 {{ $category }}
                             </div>
                             <img src="{{ $thumbnail }}" alt="{{ $title }}" loading="lazy">
@@ -771,14 +686,12 @@
                             </div>
                         </div>
                     </a>
-                @endforeach
-                
-                @if(empty($displayItems) && empty($albums))
+                @empty
                     <div class="col-12">
                         <div class="alert alert-info">Belum ada album yang tersedia.</div>
-                    </div>
-                @endif
-            </div>
+                            </div>
+                @endforelse
+                            </div>
 
             <!-- Pagination -->
             @if(isset($items) && is_array($items) && count($items) > 0)
