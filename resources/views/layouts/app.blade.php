@@ -18,7 +18,6 @@
         /* Glass helpers */
         .glass { background: rgba(255,255,255,.10); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border:1px solid rgba(255,255,255,.18); }
         .glass-soft { background: rgba(255,255,255,.08); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,.14); }
-<<<<<<< HEAD
         /* Make navbar glass and sticky feel with rounded corners (floating capsule) */
         .glass-nav{ 
             background: rgba(14,42,71,.65)!important; 

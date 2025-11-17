@@ -19,8 +19,6 @@
       <div class="alert alert-success mb-3">{{ session('status') }}</div>
     @endif
 
-<<<<<<< HEAD
-=======
     <!-- Search and Filter Form -->
     <div class="mb-4">
         <form action="{{ route('admin.agendas.index') }}" method="GET" class="row g-3">
@@ -83,12 +81,10 @@
         @endif
     </div>
 
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
     <div class="row g-3">
         @forelse(($items ?? []) as $i => $it)
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card h-100 shadow-animate">
-<<<<<<< HEAD
                 <div class="p-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <h6 class="mb-0 text-truncate" title="{{ $it->title ?? '-' }}">{{ $it->title ?? '-' }}</h6>
@@ -99,21 +95,6 @@
                         <a href="{{ route('admin.agendas.show', $it->id) }}" class="btn btn-sm btn-outline-primary flex-fill"><i class="ri-eye-line me-1"></i> Detail</a>
                         <a href="{{ route('admin.agendas.edit', $it->id) }}" class="btn btn-sm btn-outline-warning flex-fill"><i class="ri-edit-line me-1"></i> Edit</a>
                         <form action="{{ route('admin.agendas.destroy', $it->id) }}" method="POST" onsubmit="return confirm('Hapus agenda ini?')" class="m-0 p-0">
-=======
-                @if(!empty($it['poster_url']))
-                    <div class="ratio ratio-16x9"><img src="{{ $it['poster_url'] }}" alt="poster" style="object-fit:cover;width:100%;height:100%"></div>
-                @endif
-                <div class="p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <h6 class="mb-0 text-truncate" title="{{ $it['title'] ?? '-' }}">{{ $it['title'] ?? '-' }}</h6>
-                        <span class="badge bg-primary-subtle text-primary">{{ $it['date'] ?? '-' }}</span>
-                    </div>
-                    <div class="text-muted small">{{ $it['place'] ?? '' }}</div>
-                    <div class="d-flex gap-2 mt-2">
-                        <a href="{{ route('admin.agendas.show', $it['id']) }}" class="btn btn-sm btn-outline-primary flex-fill"><i class="ri-eye-line me-1"></i> Detail</a>
-                        <a href="{{ route('admin.agendas.edit', $it['id']) }}" class="btn btn-sm btn-outline-warning flex-fill"><i class="ri-edit-line me-1"></i> Edit</a>
-                        <form action="{{ route('admin.agendas.destroy', $it['id']) }}" method="POST" onsubmit="return confirm('Hapus agenda ini?')" class="m-0 p-0">
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                             @csrf @method('DELETE')
                             <button class="btn btn-sm btn-outline-danger"><i class="ri-delete-bin-line me-1"></i> Hapus</button>
                         </form>

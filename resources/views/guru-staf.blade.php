@@ -111,7 +111,6 @@
             };
         @endphp
 
-<<<<<<< HEAD
         @php
             // Gabungkan Kepala Sekolah + Guru, kepala ditaruh paling awal
             $guruAll = [];
@@ -140,44 +139,6 @@
                         <div class="person-photo">
                             <img src="{{ $src }}" alt="{{ $displayName }}">
                         </div>
-=======
-        <div class="dashboard-card mb-4 headmaster-section">
-            <h5 class="mb-2">Kepala Sekolah</h5>
-            <div class="gallery-grid">
-                @forelse(($kepala ?? []) as $i => $filename)
-                    @php
-                        [$name,$gelar] = $parseMeta($filename);
-                        $src = asset('images/kepala-sekolah/'.$filename);
-                        $displayName = trim($name . (!empty($gelar) ? ', ' . $gelar : ''));
-                    @endphp
-                    <div class="person-card">
-                        <div class="person-photo">
-                            <img src="{{ $src }}" alt="{{ $displayName }}">
-                        </div>
-                        <div class="person-info headmaster-info">
-                            <div class="person-name">{{ $displayName }}</div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="text-muted">Belum ada foto kepala sekolah.</div>
-                @endforelse
-            </div>
-        </div>
-
-        <div class="dashboard-card mb-4">
-            <h5 class="mb-2">Guru</h5>
-            <div class="gallery-grid">
-                @forelse(($guru ?? []) as $i => $filename)
-                    @php
-                        [$name,$mapel] = $parseMeta($filename);
-                        $src = asset('images/guru/'.$filename);
-                        $displayName = trim($name . (!empty($mapel) ? ', ' . $mapel : ''));
-                    @endphp
-                    <div class="person-card teacher">
-                        <div class="person-photo">
-                            <img src="{{ $src }}" alt="{{ $name }}">
-                        </div>
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                         <div class="person-info">
                             <div class="person-name">{{ $displayName }}</div>
                         </div>
@@ -246,20 +207,9 @@
         .gallery-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
     }
 
-<<<<<<< HEAD
     /* Tidak perlu section khusus kepala sekolah; sudah digabung di awal grid guru */
     .person-tag{ position:absolute; top:8px; left:8px; background: rgba(59,110,165,.95); color:#fff; padding:.18rem .5rem; border-radius:8px; font-size:.75rem; font-weight:700; box-shadow:0 6px 14px rgba(0,0,0,.15); }
     /* (tidak ada heading grid agar kepala sekolah berada satu baris dengan guru) */
-=======
-    /* Batasi ukuran tampilan Kepala Sekolah agar tidak kebesaran */
-    .headmaster-section { max-width: 320px; margin-left:auto; margin-right:auto; }
-    .headmaster-section .gallery-grid { grid-template-columns: 1fr; }
-    .headmaster-section .person-photo { padding-top: 0; height: 320px; }
-    .headmaster-section .person-photo img { width: 100%; height: 100%; object-fit: cover; }
-    .headmaster-section .headmaster-info { text-align: center; }
-    @media (min-width: 768px) { .headmaster-section { max-width: 300px; } }
-    @media (min-width: 992px) { .headmaster-section { max-width: 320px; } }
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 </style>
 @endpush
 @endsection

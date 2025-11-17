@@ -20,8 +20,6 @@
 @endif
 
 <div class="card-elevated p-3">
-<<<<<<< HEAD
-=======
     <!-- Search and Filter Form -->
     <div class="mb-4">
         <form action="{{ route('admin.guru-staf.index') }}" method="GET" class="row g-3">
@@ -78,7 +76,6 @@
             </div>
         @endif
     </div>
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 
     <div class="row g-3">
         @forelse(($items ?? []) as $i => $it)

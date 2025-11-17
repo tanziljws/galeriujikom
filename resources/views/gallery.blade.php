@@ -136,24 +136,15 @@
 @endpush
 
 @section('content')
-<<<<<<< HEAD
     <section class="section-fullscreen mb-4 section-alt py-3">
         <div class="container section-soft accented decor-gradient-top">
             <div class="text-center py-3">
                 <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 50px; height: 50px; background-color: #1E3A8A;">
                     <i class="fas fa-images" style="font-size: 1.25rem; color: white;"></i>
-=======
-    <section class="section-fullscreen mb-3 section-alt py-2" style="margin-top:0;">
-        <div class="container section-soft accented decor-gradient-top py-2 py-md-3">
-            <div class="gallery-hero text-center mb-4 mb-md-3">
-                <div class="icon-wrap">
-                    <i class="fas fa-images"></i>
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 </div>
                 <h1 class="vm-title-center">Galeri Foto Sekolah</h1>
                 <p class="vm-subtitle mb-0">Jelajahi berbagai momen berharga dan kegiatan sekolah kami</p>
             </div>
-<<<<<<< HEAD
         </div>
     </section>
 
@@ -196,7 +187,6 @@
                         </div>
                     @endif
                         
-=======
 
             <!-- Filter Section -->
             <div class="row mb-5">
@@ -299,7 +289,6 @@
                             </div>
                         </div>
                     </div>
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 </div>
             </div>
             
@@ -364,8 +353,6 @@
                     box-shadow: 0 4px 12px rgba(26, 86, 219, 0.2);
                 }
                 
-<<<<<<< HEAD
-=======
                 .filter-tab .fa-chevron-down {
                     font-size: 0.7rem;
                     margin-left: 0.5rem;
@@ -409,7 +396,6 @@
                     font-weight: 500;
                 }
                 
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 /* Active Category Badge */
                 .active-category-indicator .badge {
                     display: inline-flex;
@@ -516,39 +502,13 @@
                         max-width: 100%;
                     }
                 }
-<<<<<<< HEAD
                 
-=======
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
-            </style>
-
-            <!-- Gallery Grid -->
-            <style>
-                /* Warna Utama */
-                :root {
-                    --primary-color: #1A56DB;
-                    --secondary-color: #3F83F8;
-                    --accent-color: #E74694;
-                    --text-color: #1F2937;
-                    --light-gray: #F3F4F6;
-                    --dark-overlay: rgba(0, 0, 0, 0.6);
-                }
-
-                /* Container Utama */
-                .gallery-container {
-                    display: grid;
-<<<<<<< HEAD
-                    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-=======
-                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                     gap: 24px;
                     padding: 24px 0;
                 }
                 
                 /* Item Galeri */
                 .gallery-item {
-<<<<<<< HEAD
                     display: block !important;
                     background: rgba(255, 255, 255, 0.75) !important;
                     backdrop-filter: blur(15px) !important;
@@ -608,59 +568,10 @@
                     font-weight: 600;
                     z-index: 2;
                     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-=======
-                    position: relative;
-                    border-radius: 16px;
-                    overflow: hidden;
-                    cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    aspect-ratio: 1;
-                    background: var(--light-gray);
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-                    border: 1px solid rgba(0, 0, 0, 0.05);
-                }
-                
-                .gallery-item:hover {
-                    transform: translateY(-4px);
-                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-                }
-                
-                .gallery-item img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-                }
-                
-                .gallery-item:hover img {
-                    transform: scale(1.08);
-                }
-                
-                /* Overlay */
-                .gallery-item .overlay {
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    background: linear-gradient(to top, var(--dark-overlay) 0%, transparent 100%);
-                    padding: 24px 20px 20px;
-                    color: white;
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: flex-end;
-                    height: 100%;
-                }
-                
-                .gallery-item:hover .overlay {
-                    opacity: 1;
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 }
                 
                 /* Teks */
                 .gallery-item .title {
-<<<<<<< HEAD
                     font-weight: 700;
                     margin-bottom: 8px;
                     font-size: 1.1rem;
@@ -685,26 +596,11 @@
                     font-size: 0.85rem;
                     color: #6B7280;
                     font-weight: 500;
-=======
-                    font-weight: 600;
-                    margin-bottom: 6px;
-                    font-size: 1.2rem;
-                    line-height: 1.3;
-                    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-                }
-                
-                .gallery-item .date {
-                    font-size: 0.9rem;
-                    opacity: 0.9;
-                    color: rgba(255, 255, 255, 0.9);
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                     display: flex;
                     align-items: center;
                     gap: 6px;
                 }
                 
-<<<<<<< HEAD
-=======
                 .gallery-item .date:before {
                     content: '\f073'; /* Font Awesome calendar icon */
                     font-family: 'Font Awesome 5 Free';
@@ -735,7 +631,6 @@
                     opacity: 1;
                     transform: translateY(0);
                 }
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 
                 .gallery-card::before {
                     content: '';
@@ -828,7 +723,6 @@
                 .gallery-card:nth-child(2) { animation-delay: 0.2s; }
                 .gallery-card:nth-child(3) { animation-delay: 0.3s; }
                 .gallery-card:nth-child(4) { animation-delay: 0.4s; }
-<<<<<<< HEAD
                 
                 /* Modal Image Container */
                 .modal-image-container {
@@ -852,98 +746,12 @@
                 #photoModal .modal-content {
                     background: rgba(255, 255, 255, 0.98);
                 }
-=======
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
-            </style>
-
-            <div class="gallery-container" id="galleryGrid">
-                @php
-                    // Data contoh - akan diganti dengan data asli
-                    $sampleItems = [
-                        [
-                            'image' => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-                            'title' => 'Kunjungan Kapolres Bogor',
-                            'date' => '15 Oktober 2023',
-                            'category' => 'Kegiatan Sekolah',
-                            'views' => '1.2k',
-                            'likes' => '856'
-                        ],
-                        [
-                            'image' => 'https://images.unsplash.com/photo-1541178735493-479c1a27ed24?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-                            'title' => 'Upacara Bendera HUT RI ke-78',
-                            'date' => '17 Agustus 2023',
-                            'category' => 'Kegiatan Sekolah',
-                            'views' => '2.1k',
-                            'likes' => '1.2k'
-                        ],
-                        [
-                            'image' => 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-                            'title' => 'Pentas Seni dan Budaya',
-                            'date' => '2 September 2023',
-                            'category' => 'Ekstrakurikuler',
-                            'views' => '3.4k',
-                            'likes' => '2.3k'
-                        ],
-                        [
-                            'image' => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                            'title' => 'Study Tour ke Bandung',
-                            'date' => '10 September 2023',
-                            'category' => 'Kegiatan Khusus',
-                            'views' => '1.8k',
-                            'likes' => '1.1k'
-                        ],
-                        [
-                            'image' => 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-                            'title' => 'Lomba 17 Agustus',
-                            'date' => '17 Agustus 2023',
-                            'category' => 'Perlombaan',
-                            'views' => '2.5k',
-                            'likes' => '1.9k'
-                        ],
-                        [
-                            'image' => 'https://images.unsplash.com/photo-1541178735493-479c1a27ed24?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                            'title' => 'Peringatan Hari Guru',
-                            'date' => '25 November 2023',
-                            'category' => 'Acara Khusus',
-                            'views' => '1.9k',
-                            'likes' => '1.4k'
-                        ]
-                    ];
-                    
-                    // Gunakan data asli jika tersedia, jika tidak gunakan data contoh
-<<<<<<< HEAD
-                    $displayItems = !empty($albums) ? $albums : $sampleItems;
-                @endphp
-                
-                @foreach($displayItems as $album)
-                    @php
-                        $album = (array)$album;
-                        $thumbnail = $album['thumbnail'] ?? $album['image'] ?? 'https://via.placeholder.com/500x500?text=Galeri+SMKN+4';
-                        $title = $album['title'] ?? 'Tanpa Judul';
-                        $photoCount = $album['photo_count'] ?? 1;
-                        $date = isset($album['uploaded_at']) ? \Carbon\Carbon::parse($album['uploaded_at'])->format('d F Y') : ($album['date'] ?? now()->format('d F Y'));
-                        $category = $album['category'] ?? 'Umum';
-=======
-                    $displayItems = !empty($items) ? $items : $sampleItems;
-                @endphp
-                
-                @foreach($displayItems as $item)
-                    @php
-                        $item = (array)$item;
-                        $image = $item['image'] ?? ($item['url'] ?? 'https://via.placeholder.com/500x500?text=Galeri+SMKN+4');
-                        $title = $item['title'] ?? 'Tanpa Judul';
-                        $date = $item['date'] ?? ($item['uploaded_at'] ?? now()->format('d F Y'));
-                        $category = $item['category'] ?? 'Umum';
-                        $views = $item['views'] ?? '0';
-                        $likes = $item['likes'] ?? '0';
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                         
                         // Warna acak untuk badge kategori
                         $badgeColors = ['#E74694', '#3F83F8', '#1A56DB', '#0694A2', '#0E9F6E', '#D03801'];
                         $randomColor = $badgeColors[array_rand($badgeColors)];
                     @endphp
                     
-<<<<<<< HEAD
                     <a href="{{ route('gallery.album', urlencode($title)) }}" class="gallery-item" data-category="{{ Str::slug($category) }}" style="text-decoration: none; color: inherit; background: rgba(255, 255, 255, 0.75) !important; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); border-radius: 20px; overflow: hidden; display: block;">
                         <div class="img-wrapper">
                             <div class="category-badge">
@@ -968,39 +776,10 @@
                 @if(empty($displayItems) && empty($albums))
                     <div class="col-12">
                         <div class="alert alert-info">Belum ada album yang tersedia.</div>
-=======
-                    <div class="gallery-item" data-category="{{ Str::slug($category) }}">
-                        <img src="{{ $image }}" alt="{{ $title }}" loading="lazy">
-                        <div class="overlay">
-                            <div class="category-badge" style="background: {{ $randomColor }}">
-                                {{ $category }}
-                            </div>
-                            <div class="title">{{ $title }}</div>
-                            <div class="date">
-                                <i class="far fa-calendar-alt me-1"></i> {{ $date }}
-                            </div>
-                            <div class="d-flex align-items-center mt-2">
-                                <span class="me-3">
-                                    <i class="far fa-eye me-1"></i> {{ $views }}
-                                </span>
-                                <span>
-                                    <i class="far fa-heart me-1"></i> {{ $likes }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-                
-                @if(empty($displayItems) && empty($items))
-                    <div class="col-12">
-                        <div class="alert alert-info">Belum ada foto yang tersedia.</div>
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                     </div>
                 @endif
             </div>
 
-<<<<<<< HEAD
-=======
             <!-- Pagination -->
             @if(isset($items) && is_array($items) && count($items) > 0)
                 @php
@@ -1039,7 +818,6 @@
                     </div>
                 @endif
             @endif
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         </div>
     </section>
 
@@ -1054,11 +832,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-8">
-<<<<<<< HEAD
                             <div class="modal-image-container mb-3">
-=======
-                            <div class="ratio ratio-16x9 mb-3">
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                                 <img id="modalImage" src="" alt="" class="img-fluid rounded">
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1555,48 +1329,12 @@
                 }
             });
             
-<<<<<<< HEAD
             // Handle category filter button clicks
             document.querySelectorAll('button[data-category]').forEach(btn => {
-=======
-            // Handle category selection
-            const categoryBtns = document.querySelectorAll('.category-btn, .subcategory-item');
-            const categoryFilter = document.getElementById('categoryFilter');
-            const activeCategoryDisplay = document.getElementById('activeCategory');
-            const applyFilterBtn = document.getElementById('applyFilter');
-            
-            // Initialize active state
-            const activeCategory = '{{ request('category') }}';
-            if (activeCategory) {
-                // Find and activate the corresponding button
-                categoryBtns.forEach(btn => {
-                    if (btn.dataset.category === activeCategory) {
-                        btn.classList.add('active');
-                        if (btn.classList.contains('dropdown-item')) {
-                            // If it's a subcategory, also activate its parent dropdown
-                            const dropdown = btn.closest('.dropdown');
-                            if (dropdown) {
-                                const dropdownBtn = dropdown.querySelector('.dropdown-toggle');
-                                if (dropdownBtn) {
-                                    dropdownBtn.classList.add('active');
-                                }
-                            }
-                        }
-                    }
-                });
-            } else {
-                // Activate 'Semua' button if no category is selected
-                document.querySelector('.category-btn[data-category=""]')?.classList.add('active');
-            }
-            
-            // Handle category button clicks
-            categoryBtns.forEach(btn => {
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const selectedCategory = this.dataset.category;
                     
-<<<<<<< HEAD
                     // Build URL with query parameters
                     const url = new URL(window.location.href.split('?')[0]);
                     if (selectedCategory) {
@@ -1641,53 +1379,11 @@
                 if (sortBy && sortBy !== 'latest') {
                     url.searchParams.set('sort', sortBy);
                 }
-=======
-                    // Update active states
-                    document.querySelectorAll('.category-btn, .subcategory-item').forEach(el => {
-                        el.classList.remove('active');
-                    });
-                    
-                    if (selectedCategory === '') {
-                        // 'Semua' category selected
-                        document.querySelector('.category-btn[data-category=""]').classList.add('active');
-                        categoryFilter.value = '';
-                        activeCategoryDisplay.innerHTML = '';
-                    } else if (this.classList.contains('dropdown-toggle')) {
-                        // Main category selected
-                        this.classList.add('active');
-                        categoryFilter.value = selectedCategory;
-                        activeCategoryDisplay.innerHTML = `Kategori aktif: <span class="text-primary">${selectedCategory}</span>`;
-                    } else {
-                        // Subcategory selected
-                        this.classList.add('active');
-                        const parentDropdown = this.closest('.dropdown');
-                        if (parentDropdown) {
-                            parentDropdown.querySelector('.dropdown-toggle').classList.add('active');
-                        }
-                        categoryFilter.value = selectedCategory;
-                        activeCategoryDisplay.innerHTML = `Kategori aktif: <span class="text-primary">${selectedCategory}</span>`;
-                    }
-                });
-            });
-            
-            // Apply filter button
-            applyFilterBtn.addEventListener('click', function() {
-                const category = categoryFilter.value;
-                const sortBy = document.getElementById('sortBy').value;
-                
-                // Build URL with query parameters
-                const url = new URL(window.location.href.split('?')[0]);
-                if (category) url.searchParams.set('category', category);
-                else url.searchParams.delete('category');
-                
-                if (sortBy) url.searchParams.set('sort', sortBy);
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                 
                 window.location.href = url.toString();
             });
             
             // Handle sort change
-<<<<<<< HEAD
             document.getElementById('sortBy')?.addEventListener('change', function() {
                 const url = new URL(window.location.href.split('?')[0]);
                 
@@ -1737,43 +1433,6 @@
                 }
             });
             // Gallery items are now links to album pages, no need for click handlers
-=======
-            document.getElementById('sortBy').addEventListener('change', function() {
-                applyFilterBtn.click();
-            });
-            // Current photo ID for interactions
-            let currentPhotoId = null;
-            
-            // Handle gallery item click
-            document.querySelectorAll('.gallery-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Get photo data from data attributes
-                    const photoId = this.getAttribute('data-id');
-                    const imageUrl = this.getAttribute('data-image');
-                    const title = this.getAttribute('data-title');
-                    const likes = this.getAttribute('data-likes');
-                    const dislikes = this.getAttribute('data-dislikes');
-                    const commentsCount = this.getAttribute('data-comments');
-                    
-                    // Update modal with photo data
-                    document.getElementById('modalImage').src = imageUrl;
-                    document.getElementById('modalTitle').textContent = title;
-                    document.getElementById('likeCount').textContent = likes;
-                    document.getElementById('dislikeCount').textContent = dislikes;
-                    document.getElementById('commentsCount').textContent = commentsCount;
-                    document.getElementById('commentPhotoId').value = photoId;
-                    document.getElementById('downloadPhotoId').value = photoId;
-                    
-                    // Store current photo ID
-                    currentPhotoId = photoId;
-                    
-                    // Load comments for this photo
-                    loadComments(photoId);
-                });
-            });
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
             
             // Handle like/dislike buttons
             document.querySelectorAll('.like-btn, .dislike-btn').forEach(button => {
@@ -1883,8 +1542,6 @@
                 // window.location.href = `/photos/${photoId}/download?name=${encodeURIComponent(formData.get('name'))}&email=${encodeURIComponent(formData.get('email'))}&purpose=${encodeURIComponent(formData.get('purpose'))}`;
             });
             
-<<<<<<< HEAD
-=======
             // Handle filter form submission
             document.getElementById('applyFilter')?.addEventListener('click', function() {
                 const category = document.getElementById('categoryFilter').value;
@@ -1899,7 +1556,6 @@
                 window.location.href = `${window.location.pathname}?${params.toString()}`;
             });
             
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
             // Load comments for a photo
             function loadComments(photoId) {
                 fetch(`/gallery/comments/${photoId}`)

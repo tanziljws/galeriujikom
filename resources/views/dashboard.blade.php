@@ -50,11 +50,7 @@
                                 </div>
                                 <div class="tile text-center">
                                     <div class="tile-icon"><i class="fas fa-users"></i></div>
-<<<<<<< HEAD
                                     <div class="tile-value">24</div>
-=======
-                                    <div class="tile-value">22</div>
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                                     <div class="tile-label">Staf TU</div>
                                 </div>
                                 <div class="tile text-center">

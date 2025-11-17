@@ -19,8 +19,6 @@
       <div class="alert alert-success mb-3">{{ session('status') }}</div>
     @endif
 
-<<<<<<< HEAD
-=======
     <!-- Search and Filter Form -->
     <div class="mb-4">
         <form action="{{ route('admin.posts.index') }}" method="GET" class="row g-3">
@@ -77,7 +75,6 @@
         @endif
     </div>
 
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
     <div class="row g-3">
         @forelse(($items ?? []) as $i => $it)
         <div class="col-12 col-sm-6 col-lg-4">
