@@ -16,59 +16,103 @@ class GalleryController extends Controller
 {
     public function index()
     {
-        // Load categories from JSON file (tetap), dipakai sebagai daftar pilihan kategori
-        $categoriesPath = resource_path('data/umbrella_categories.json');
-        $categories = is_file($categoriesPath) ? json_decode(file_get_contents($categoriesPath), true) : [];
+        try {
+            // Load categories from JSON file (tetap), dipakai sebagai daftar pilihan kategori
+            $categoriesPath = resource_path('data/umbrella_categories.json');
+            $categories = [];
+            
+            if (is_file($categoriesPath)) {
+                try {
+                    $jsonContent = file_get_contents($categoriesPath);
+                    $decoded = json_decode($jsonContent, true);
+                    // Handle both flat array and nested structure
+                    if (is_array($decoded)) {
+                        // If it's a nested structure (umbrella categories), flatten it
+                        if (isset($decoded[0]) && is_array($decoded[0])) {
+                            $categories = [];
+                            foreach ($decoded as $umbrella => $subcats) {
+                                if (is_array($subcats)) {
+                                    $categories = array_merge($categories, $subcats);
+                                } else {
+                                    $categories[] = $subcats;
+                                }
+                            }
+                        } else {
+                            $categories = $decoded;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error reading categories file: ' . $e->getMessage());
+                    $categories = [];
+                }
+            }
+            
+            // Ensure categories is always an array
+            if (!is_array($categories)) {
+                $categories = [];
+            }
 
-        $activeCategory = request('category', '');
-        $searchQuery = request('search', '');
+            $activeCategory = request('category', '');
+            $searchQuery = request('search', '');
 
-        // Query dari DB
-        $query = GalleryItem::query()->whereNotNull('filename');
-        if ($activeCategory !== '') {
-            $query->where('category', $activeCategory);
-        }
-        if ($searchQuery !== '') {
-            $query->where(function($q) use ($searchQuery){
-                $q->where('title', 'like', '%'.$searchQuery.'%')
-                  ->orWhere('category', 'like', '%'.$searchQuery.'%');
-            });
-        }
-        $items = $query->orderByDesc('created_at')->get();
+            // Query dari DB
+            $query = GalleryItem::query()->whereNotNull('filename');
+            if ($activeCategory !== '') {
+                $query->where('category', $activeCategory);
+            }
+            if ($searchQuery !== '') {
+                $query->where(function($q) use ($searchQuery){
+                    $q->where('title', 'like', '%'.$searchQuery.'%')
+                      ->orWhere('category', 'like', '%'.$searchQuery.'%');
+                });
+            }
+            $items = $query->orderByDesc('created_at')->get();
 
-        // Normalisasi dan grouping per judul menjadi album
-        $albums = [];
-        foreach ($items as $it) {
-            $title = $it->title ?: 'Tanpa Judul';
-            $url = $it->filename ? asset('uploads/gallery/'.$it->filename) : ($it->image_path ?? '');
-            if (!isset($albums[$title])) {
-                $albums[$title] = [
+            // Normalisasi dan grouping per judul menjadi album
+            $albums = [];
+            foreach ($items as $it) {
+                $title = $it->title ?: 'Tanpa Judul';
+                $url = $it->filename ? asset('uploads/gallery/'.$it->filename) : ($it->image_path ?? '');
+                if (!isset($albums[$title])) {
+                    $albums[$title] = [
+                        'title' => $title,
+                        'category' => $it->category ?? 'Lainnya',
+                        'photos' => [],
+                        'thumbnail' => $url,
+                        'uploaded_at' => optional($it->created_at)->toDateTimeString(),
+                        'photo_count' => 0,
+                    ];
+                }
+                $albums[$title]['photos'][] = [
+                    'id' => $it->id,
                     'title' => $title,
                     'category' => $it->category ?? 'Lainnya',
-                    'photos' => [],
-                    'thumbnail' => $url,
+                    'url' => $url,
                     'uploaded_at' => optional($it->created_at)->toDateTimeString(),
-                    'photo_count' => 0,
                 ];
+                $albums[$title]['photo_count']++;
             }
-            $albums[$title]['photos'][] = [
-                'id' => $it->id,
-                'title' => $title,
-                'category' => $it->category ?? 'Lainnya',
-                'url' => $url,
-                'uploaded_at' => optional($it->created_at)->toDateTimeString(),
-            ];
-            $albums[$title]['photo_count']++;
-        }
-        $albums = array_values($albums);
-        usort($albums, function($a,$b){ return strcmp($b['uploaded_at'] ?? '', $a['uploaded_at'] ?? ''); });
+            $albums = array_values($albums);
+            usort($albums, function($a,$b){ return strcmp($b['uploaded_at'] ?? '', $a['uploaded_at'] ?? ''); });
 
-        return view('gallery', [
-            'categories' => $categories,
-            'activeCategory' => $activeCategory,
-            'searchQuery' => $searchQuery,
-            'albums' => $albums
-        ]);
+            return view('gallery', [
+                'categories' => $categories,
+                'activeCategory' => $activeCategory,
+                'searchQuery' => $searchQuery,
+                'albums' => $albums
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Gallery index error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            // Return view with empty data on error
+            return view('gallery', [
+                'categories' => [],
+                'activeCategory' => '',
+                'searchQuery' => '',
+                'albums' => []
+            ]);
+        }
     }
     
     public function showAlbum($title)
