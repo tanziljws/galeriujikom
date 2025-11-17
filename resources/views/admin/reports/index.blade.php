@@ -199,7 +199,7 @@
           <div class="col-md-6 col-lg-4">
             <div class="card h-100 shadow-sm">
               <div class="ratio ratio-16x9">
-                <img src="{{ $url }}" alt="{{ $photo->title }}" style="object-fit: cover;">
+                <img src="{{ $url }}" alt="{{ $photo->title ?? 'Tanpa Judul' }}" style="object-fit: cover;">
               </div>
               <div class="card-body">
                 <h6 class="card-title">{{ $photo->title ?? 'Tanpa Judul' }}</h6>
