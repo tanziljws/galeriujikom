@@ -50,40 +50,38 @@ class ReportController extends Controller
                 $photos = collect();
             }
             
-            // Get reactions - use chunk to avoid memory issues
+            // Get reactions - simplified query with limit
             $reactionsByPhoto = [];
             try {
-                PhotoReaction::chunk(100, function ($reactions) use (&$reactionsByPhoto) {
-                    foreach ($reactions as $r) {
-                        $photoId = (string)($r->photo_id ?? '');
-                        if ($photoId) {
-                            if (!isset($reactionsByPhoto[$photoId])) {
-                                $reactionsByPhoto[$photoId] = ['like' => 0, 'dislike' => 0];
-                            }
-                            $reaction = $r->reaction ?? '';
-                            if ($reaction === 'like') {
-                                $reactionsByPhoto[$photoId]['like']++;
-                            } elseif ($reaction === 'dislike') {
-                                $reactionsByPhoto[$photoId]['dislike']++;
-                            }
+                $reactions = PhotoReaction::limit(1000)->get();
+                foreach ($reactions as $r) {
+                    $photoId = (string)($r->photo_id ?? '');
+                    if ($photoId) {
+                        if (!isset($reactionsByPhoto[$photoId])) {
+                            $reactionsByPhoto[$photoId] = ['like' => 0, 'dislike' => 0];
+                        }
+                        $reaction = $r->reaction ?? '';
+                        if ($reaction === 'like') {
+                            $reactionsByPhoto[$photoId]['like']++;
+                        } elseif ($reaction === 'dislike') {
+                            $reactionsByPhoto[$photoId]['dislike']++;
                         }
                     }
-                });
+                }
             } catch (\Exception $e) {
                 // Ignore errors
             }
             
-            // Get downloads - use chunk to avoid memory issues
+            // Get downloads - simplified query with limit
             $downloadsByPhoto = [];
             try {
-                DownloadLog::chunk(100, function ($downloads) use (&$downloadsByPhoto) {
-                    foreach ($downloads as $d) {
-                        $photoId = (string)($d->photo_id ?? '');
-                        if ($photoId) {
-                            $downloadsByPhoto[$photoId] = ($downloadsByPhoto[$photoId] ?? 0) + 1;
-                        }
+                $downloads = DownloadLog::limit(1000)->get();
+                foreach ($downloads as $d) {
+                    $photoId = (string)($d->photo_id ?? '');
+                    if ($photoId) {
+                        $downloadsByPhoto[$photoId] = ($downloadsByPhoto[$photoId] ?? 0) + 1;
                     }
-                });
+                }
             } catch (\Exception $e) {
                 // Ignore errors
             }
@@ -208,40 +206,38 @@ class ReportController extends Controller
         try {
             $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get();
             
-            // Get reactions
+            // Get reactions - simplified query
             $reactionsByPhoto = [];
             try {
-                PhotoReaction::chunk(100, function ($reactions) use (&$reactionsByPhoto) {
-                    foreach ($reactions as $r) {
-                        $photoId = (string)($r->photo_id ?? '');
-                        if ($photoId) {
-                            if (!isset($reactionsByPhoto[$photoId])) {
-                                $reactionsByPhoto[$photoId] = ['like' => 0, 'dislike' => 0];
-                            }
-                            $reaction = $r->reaction ?? '';
-                            if ($reaction === 'like') {
-                                $reactionsByPhoto[$photoId]['like']++;
-                            } elseif ($reaction === 'dislike') {
-                                $reactionsByPhoto[$photoId]['dislike']++;
-                            }
+                $reactions = PhotoReaction::limit(1000)->get();
+                foreach ($reactions as $r) {
+                    $photoId = (string)($r->photo_id ?? '');
+                    if ($photoId) {
+                        if (!isset($reactionsByPhoto[$photoId])) {
+                            $reactionsByPhoto[$photoId] = ['like' => 0, 'dislike' => 0];
+                        }
+                        $reaction = $r->reaction ?? '';
+                        if ($reaction === 'like') {
+                            $reactionsByPhoto[$photoId]['like']++;
+                        } elseif ($reaction === 'dislike') {
+                            $reactionsByPhoto[$photoId]['dislike']++;
                         }
                     }
-                });
+                }
             } catch (\Exception $e) {
                 // Ignore
             }
             
-            // Get downloads
+            // Get downloads - simplified query
             $downloadsByPhoto = [];
             try {
-                DownloadLog::chunk(100, function ($downloads) use (&$downloadsByPhoto) {
-                    foreach ($downloads as $d) {
-                        $photoId = (string)($d->photo_id ?? '');
-                        if ($photoId) {
-                            $downloadsByPhoto[$photoId] = ($downloadsByPhoto[$photoId] ?? 0) + 1;
-                        }
+                $downloads = DownloadLog::limit(1000)->get();
+                foreach ($downloads as $d) {
+                    $photoId = (string)($d->photo_id ?? '');
+                    if ($photoId) {
+                        $downloadsByPhoto[$photoId] = ($downloadsByPhoto[$photoId] ?? 0) + 1;
                     }
-                });
+                }
             } catch (\Exception $e) {
                 // Ignore
             }
