@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Models\GalleryItem;
 use App\Models\PhotoReaction;
 use App\Models\DownloadLog;
-use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -23,7 +22,7 @@ class ReportController extends Controller
         $photoReports = [];
         
         try {
-            // Get user statistics - simple and safe
+            // Get user statistics
             try {
                 $totalUsers = (int) User::count();
             } catch (\Exception $e) {
@@ -32,103 +31,107 @@ class ReportController extends Controller
             
             try {
                 $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get();
-                if (!$recentUsers) {
-                    $recentUsers = collect();
-                }
             } catch (\Exception $e) {
                 $recentUsers = collect();
             }
             
-            // Get photos - simple and safe
+            // Get photos
             $photos = collect();
             try {
                 $photos = GalleryItem::whereNotNull('filename')->limit(100)->get();
-                if (!$photos) {
-                    $photos = collect();
-                }
             } catch (\Exception $e) {
                 $photos = collect();
             }
             
-            // Get reactions - simplified query with limit
+            // Get reactions - count directly for each photo
             $reactionsByPhoto = [];
             try {
-                $reactions = PhotoReaction::limit(1000)->get();
-                foreach ($reactions as $r) {
-                    $photoId = (string)($r->photo_id ?? '');
-                    if ($photoId) {
-                        if (!isset($reactionsByPhoto[$photoId])) {
-                            $reactionsByPhoto[$photoId] = ['like' => 0, 'dislike' => 0];
-                        }
-                        $reaction = $r->reaction ?? '';
-                        if ($reaction === 'like') {
-                            $reactionsByPhoto[$photoId]['like']++;
-                        } elseif ($reaction === 'dislike') {
-                            $reactionsByPhoto[$photoId]['dislike']++;
-                        }
+                foreach ($photos as $photo) {
+                    if (!$photo || !isset($photo->id)) continue;
+                    $photoId = (string)$photo->id;
+                    
+                    try {
+                        $likes = PhotoReaction::where('photo_id', $photoId)
+                            ->where('reaction', 'like')
+                            ->count();
+                        $dislikes = PhotoReaction::where('photo_id', $photoId)
+                            ->where('reaction', 'dislike')
+                            ->count();
+                        
+                        $reactionsByPhoto[$photoId] = [
+                            'like' => (int)$likes,
+                            'dislike' => (int)$dislikes
+                        ];
+                    } catch (\Exception $e) {
+                        $reactionsByPhoto[$photoId] = ['like' => 0, 'dislike' => 0];
                     }
                 }
             } catch (\Exception $e) {
-                // Ignore errors
+                // Ignore
             }
             
-            // Get downloads - simplified query with limit
+            // Get downloads - count directly for each photo
             $downloadsByPhoto = [];
             try {
-                $downloads = DownloadLog::limit(1000)->get();
-                foreach ($downloads as $d) {
-                    $photoId = (string)($d->photo_id ?? '');
-                    if ($photoId) {
-                        $downloadsByPhoto[$photoId] = ($downloadsByPhoto[$photoId] ?? 0) + 1;
+                foreach ($photos as $photo) {
+                    if (!$photo || !isset($photo->id)) continue;
+                    $photoId = (string)$photo->id;
+                    
+                    try {
+                        $downloads = DownloadLog::where('photo_id', $photoId)->count();
+                        $downloadsByPhoto[$photoId] = (int)$downloads;
+                    } catch (\Exception $e) {
+                        $downloadsByPhoto[$photoId] = 0;
                     }
                 }
             } catch (\Exception $e) {
-                // Ignore errors
+                // Ignore
             }
             
             // Process photos
-            if ($photos->isNotEmpty()) {
-                foreach ($photos as $photo) {
-                    try {
-                        if (!$photo || !isset($photo->id)) {
-                            continue;
-                        }
-                        
-                        $photoId = (string)$photo->id;
-                        
-                        $likes = (int)($reactionsByPhoto[$photoId]['like'] ?? 0);
-                        $dislikes = (int)($reactionsByPhoto[$photoId]['dislike'] ?? 0);
-                        $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
-                        
-                        $photoReports[] = [
-                            'photo' => $photo,
-                            'stats' => [
-                                'likes' => $likes,
-                                'dislikes' => $dislikes,
-                                'downloads' => $downloads
-                            ]
-                        ];
-                    } catch (\Exception $e) {
+            foreach ($photos as $photo) {
+                try {
+                    if (!$photo || !isset($photo->id)) {
                         continue;
                     }
+                    
+                    $photoId = (string)$photo->id;
+                    
+                    $likes = (int)($reactionsByPhoto[$photoId]['like'] ?? 0);
+                    $dislikes = (int)($reactionsByPhoto[$photoId]['dislike'] ?? 0);
+                    $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
+                    
+                    $photoReports[] = [
+                        'photo' => $photo,
+                        'stats' => [
+                            'likes' => $likes,
+                            'dislikes' => $dislikes,
+                            'downloads' => $downloads
+                        ]
+                    ];
+                } catch (\Exception $e) {
+                    continue;
                 }
             }
             
             // Sort
-            usort($photoReports, function($a, $b) {
-                $totalA = (int)(($a['stats']['likes'] ?? 0) + ($a['stats']['dislikes'] ?? 0) + ($a['stats']['downloads'] ?? 0));
-                $totalB = (int)(($b['stats']['likes'] ?? 0) + ($b['stats']['dislikes'] ?? 0) + ($b['stats']['downloads'] ?? 0));
-                return $totalB - $totalA;
-            });
+            try {
+                usort($photoReports, function($a, $b) {
+                    $totalA = (int)(($a['stats']['likes'] ?? 0) + ($a['stats']['dislikes'] ?? 0) + ($a['stats']['downloads'] ?? 0));
+                    $totalB = (int)(($b['stats']['likes'] ?? 0) + ($b['stats']['dislikes'] ?? 0) + ($b['stats']['downloads'] ?? 0));
+                    return $totalB - $totalA;
+                });
+            } catch (\Exception $e) {
+                // Ignore sort errors
+            }
             
-        } catch (\Throwable $e) {
-            // Fallback to empty data on any error
+        } catch (\Exception $e) {
+            // Fallback to empty data
             $totalUsers = 0;
             $recentUsers = collect();
             $photoReports = [];
         }
         
-        // Always return view with safe data
         return view('admin.reports.index', [
             'totalUsers' => $totalUsers,
             'recentUsers' => $recentUsers,
@@ -136,9 +139,6 @@ class ReportController extends Controller
         ]);
     }
     
-    /**
-     * Show detailed user report
-     */
     public function users()
     {
         try {
@@ -196,9 +196,6 @@ class ReportController extends Controller
         }
     }
     
-    /**
-     * Show detailed photo report
-     */
     public function photos()
     {
         $photoReports = [];
@@ -206,58 +203,28 @@ class ReportController extends Controller
         try {
             $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get();
             
-            // Get reactions - simplified query
-            $reactionsByPhoto = [];
-            try {
-                $reactions = PhotoReaction::limit(1000)->get();
-                foreach ($reactions as $r) {
-                    $photoId = (string)($r->photo_id ?? '');
-                    if ($photoId) {
-                        if (!isset($reactionsByPhoto[$photoId])) {
-                            $reactionsByPhoto[$photoId] = ['like' => 0, 'dislike' => 0];
-                        }
-                        $reaction = $r->reaction ?? '';
-                        if ($reaction === 'like') {
-                            $reactionsByPhoto[$photoId]['like']++;
-                        } elseif ($reaction === 'dislike') {
-                            $reactionsByPhoto[$photoId]['dislike']++;
-                        }
-                    }
-                }
-            } catch (\Exception $e) {
-                // Ignore
-            }
-            
-            // Get downloads - simplified query
-            $downloadsByPhoto = [];
-            try {
-                $downloads = DownloadLog::limit(1000)->get();
-                foreach ($downloads as $d) {
-                    $photoId = (string)($d->photo_id ?? '');
-                    if ($photoId) {
-                        $downloadsByPhoto[$photoId] = ($downloadsByPhoto[$photoId] ?? 0) + 1;
-                    }
-                }
-            } catch (\Exception $e) {
-                // Ignore
-            }
-            
             foreach ($allPhotos as $photo) {
                 try {
                     if (!$photo || !isset($photo->id)) continue;
                     
                     $photoId = (string)$photo->id;
                     
-                    $likes = (int)($reactionsByPhoto[$photoId]['like'] ?? 0);
-                    $dislikes = (int)($reactionsByPhoto[$photoId]['dislike'] ?? 0);
-                    $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
+                    try {
+                        $likes = PhotoReaction::where('photo_id', $photoId)->where('reaction', 'like')->count();
+                        $dislikes = PhotoReaction::where('photo_id', $photoId)->where('reaction', 'dislike')->count();
+                        $downloads = DownloadLog::where('photo_id', $photoId)->count();
+                    } catch (\Exception $e) {
+                        $likes = 0;
+                        $dislikes = 0;
+                        $downloads = 0;
+                    }
                     
                     $photoReports[] = [
                         'photo' => $photo,
                         'stats' => [
-                            'likes' => $likes,
-                            'dislikes' => $dislikes,
-                            'downloads' => $downloads
+                            'likes' => (int)$likes,
+                            'dislikes' => (int)$dislikes,
+                            'downloads' => (int)$downloads
                         ]
                     ];
                 } catch (\Exception $e) {
@@ -273,9 +240,6 @@ class ReportController extends Controller
         ]);
     }
     
-    /**
-     * Export user report to PDF
-     */
     public function exportUsersPdf()
     {
         try {
@@ -296,9 +260,6 @@ class ReportController extends Controller
         }
     }
     
-    /**
-     * Export photo report to PDF
-     */
     public function exportPhotosPdf()
     {
         try {
@@ -309,15 +270,11 @@ class ReportController extends Controller
                 try {
                     if (!$photo || !isset($photo->id)) continue;
                     
-                    $likes = PhotoReaction::where('photo_id', (string)$photo->id)
-                        ->where('reaction', 'like')
-                        ->count();
+                    $photoId = (string)$photo->id;
                     
-                    $dislikes = PhotoReaction::where('photo_id', (string)$photo->id)
-                        ->where('reaction', 'dislike')
-                        ->count();
-                    
-                    $downloads = DownloadLog::where('photo_id', (string)$photo->id)->count();
+                    $likes = PhotoReaction::where('photo_id', $photoId)->where('reaction', 'like')->count();
+                    $dislikes = PhotoReaction::where('photo_id', $photoId)->where('reaction', 'dislike')->count();
+                    $downloads = DownloadLog::where('photo_id', $photoId)->count();
                     
                     $photoReports[] = [
                         'photo' => $photo,
