@@ -18,111 +18,143 @@ class ReportController extends Controller
      */
     public function index()
     {
+        // Initialize all variables with safe defaults
+        $totalUsers = 0;
+        $recentUsers = collect();
+        $photoReports = [];
+        
         try {
-            // Get user statistics
-            $totalUsers = 0;
-            $recentUsers = collect();
+            // Get user statistics - with full error handling
             try {
-                $totalUsers = User::count();
-                $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get();
-            } catch (\Exception $e) {
-                \Log::error('Error fetching users: ' . $e->getMessage());
+                if (class_exists(User::class)) {
+                    $totalUsers = (int)User::count();
+                    $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get() ?: collect();
+                }
+            } catch (\Throwable $e) {
+                \Log::error('Error fetching users in reports: ' . $e->getMessage());
+                $totalUsers = 0;
+                $recentUsers = collect();
             }
             
-            // Get photo statistics from database - use more efficient query
+            // Get photos - with full error handling
             $photos = collect();
-            $photoReports = [];
             try {
-                $photos = GalleryItem::whereNotNull('filename')->limit(100)->get();
-            } catch (\Exception $e) {
-                \Log::error('Error fetching photos: ' . $e->getMessage());
+                if (class_exists(GalleryItem::class)) {
+                    $photos = GalleryItem::whereNotNull('filename')->limit(100)->get() ?: collect();
+                }
+            } catch (\Throwable $e) {
+                \Log::error('Error fetching photos in reports: ' . $e->getMessage());
                 $photos = collect();
             }
             
-            // Get all reactions grouped by photo_id for efficiency
+            // Get reactions - with full error handling
             $reactionsByPhoto = [];
             try {
-                $reactionsData = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
-                    ->groupBy('photo_id', 'reaction')
-                    ->get();
-                foreach ($reactionsData as $r) {
-                    if (!isset($reactionsByPhoto[$r->photo_id])) {
-                        $reactionsByPhoto[$r->photo_id] = [];
-                    }
-                    $reactionsByPhoto[$r->photo_id][] = [
-                        'reaction' => $r->reaction,
-                        'count' => (int)$r->count
-                    ];
-                }
-            } catch (\Exception $e) {
-                \Log::error('Error fetching reactions: ' . $e->getMessage());
-            }
-            
-            // Get all downloads grouped by photo_id
-            $downloadsByPhoto = [];
-            try {
-                $downloadsData = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
-                    ->groupBy('photo_id')
-                    ->get();
-                foreach ($downloadsData as $d) {
-                    $downloadsByPhoto[$d->photo_id] = (int)$d->count;
-                }
-            } catch (\Exception $e) {
-                \Log::error('Error fetching downloads: ' . $e->getMessage());
-            }
-            
-            foreach ($photos as $photo) {
-                try {
-                    $photoId = (string)$photo->id;
+                if (class_exists(PhotoReaction::class) && \Schema::hasTable('photo_reactions')) {
+                    $reactionsData = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
+                        ->groupBy('photo_id', 'reaction')
+                        ->get();
                     
-                    $photoReactions = $reactionsByPhoto[$photoId] ?? [];
-                    $likes = 0;
-                    $dislikes = 0;
-                    foreach ($photoReactions as $r) {
-                        if ($r['reaction'] === 'like') {
-                            $likes += (int)$r['count'];
-                        } elseif ($r['reaction'] === 'dislike') {
-                            $dislikes += (int)$r['count'];
+                    foreach ($reactionsData as $r) {
+                        $photoId = (string)($r->photo_id ?? '');
+                        if ($photoId) {
+                            if (!isset($reactionsByPhoto[$photoId])) {
+                                $reactionsByPhoto[$photoId] = [];
+                            }
+                            $reactionsByPhoto[$photoId][] = [
+                                'reaction' => (string)($r->reaction ?? ''),
+                                'count' => (int)($r->count ?? 0)
+                            ];
                         }
                     }
-                    $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
+                }
+            } catch (\Throwable $e) {
+                \Log::error('Error fetching reactions in reports: ' . $e->getMessage());
+            }
+            
+            // Get downloads - with full error handling
+            $downloadsByPhoto = [];
+            try {
+                if (class_exists(DownloadLog::class) && \Schema::hasTable('download_logs')) {
+                    $downloadsData = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
+                        ->groupBy('photo_id')
+                        ->get();
                     
-                    $photoReports[] = [
-                        'photo' => $photo,
-                        'stats' => [
-                            'likes' => (int)$likes,
-                            'dislikes' => (int)$dislikes,
-                            'downloads' => (int)$downloads
-                        ]
-                    ];
-                } catch (\Exception $e) {
-                    \Log::error('Error processing photo stats for photo ID ' . $photo->id . ': ' . $e->getMessage());
-                    continue;
+                    foreach ($downloadsData as $d) {
+                        $photoId = (string)($d->photo_id ?? '');
+                        if ($photoId) {
+                            $downloadsByPhoto[$photoId] = (int)($d->count ?? 0);
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                \Log::error('Error fetching downloads in reports: ' . $e->getMessage());
+            }
+            
+            // Process photos
+            if ($photos && $photos->count() > 0) {
+                foreach ($photos as $photo) {
+                    try {
+                        if (!$photo || !$photo->id) {
+                            continue;
+                        }
+                        
+                        $photoId = (string)$photo->id;
+                        
+                        $photoReactions = $reactionsByPhoto[$photoId] ?? [];
+                        $likes = 0;
+                        $dislikes = 0;
+                        
+                        foreach ($photoReactions as $r) {
+                            $reaction = $r['reaction'] ?? '';
+                            $count = (int)($r['count'] ?? 0);
+                            if ($reaction === 'like') {
+                                $likes += $count;
+                            } elseif ($reaction === 'dislike') {
+                                $dislikes += $count;
+                            }
+                        }
+                        
+                        $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
+            
+            $photoReports[] = [
+                'photo' => $photo,
+                'stats' => [
+                                'likes' => (int)$likes,
+                                'dislikes' => (int)$dislikes,
+                                'downloads' => (int)$downloads
+                            ]
+                        ];
+                    } catch (\Throwable $e) {
+                        \Log::error('Error processing photo stats: ' . $e->getMessage());
+                        continue;
+                    }
                 }
             }
             
-            // Sort by total interactions (likes + dislikes + downloads)
-            usort($photoReports, function($a, $b) {
-                $totalA = ($a['stats']['likes'] ?? 0) + ($a['stats']['dislikes'] ?? 0) + ($a['stats']['downloads'] ?? 0);
-                $totalB = ($b['stats']['likes'] ?? 0) + ($b['stats']['dislikes'] ?? 0) + ($b['stats']['downloads'] ?? 0);
-                return $totalB - $totalA;
-            });
+            // Sort safely
+            try {
+        usort($photoReports, function($a, $b) {
+                    $totalA = (int)(($a['stats']['likes'] ?? 0) + ($a['stats']['dislikes'] ?? 0) + ($a['stats']['downloads'] ?? 0));
+                    $totalB = (int)(($b['stats']['likes'] ?? 0) + ($b['stats']['dislikes'] ?? 0) + ($b['stats']['downloads'] ?? 0));
+            return $totalB - $totalA;
+        });
+            } catch (\Throwable $e) {
+                \Log::error('Error sorting photo reports: ' . $e->getMessage());
+            }
             
-            return view('admin.reports.index', [
-                'totalUsers' => $totalUsers ?? 0,
-                'recentUsers' => $recentUsers ?? collect(),
-                'photoReports' => $photoReports ?? []
-            ]);
         } catch (\Throwable $e) {
-            \Log::error('Reports index error: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            \Log::error('Reports index fatal error: ' . $e->getMessage());
             \Log::error('File: ' . $e->getFile() . ' Line: ' . $e->getLine());
-            return view('admin.reports.index', [
-                'totalUsers' => 0,
-                'recentUsers' => collect(),
-                'photoReports' => []
-            ])->withErrors(['error' => 'Terjadi kesalahan saat memuat laporan: ' . $e->getMessage()]);
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
         }
+        
+        // Always return view with safe data
+        return view('admin.reports.index', [
+            'totalUsers' => (int)($totalUsers ?? 0),
+            'recentUsers' => $recentUsers ?? collect(),
+            'photoReports' => $photoReports ?? []
+        ]);
     }
     
     /**
@@ -130,16 +162,26 @@ class ReportController extends Controller
      */
     public function users()
     {
+        try {
         $users = User::orderBy('created_at', 'desc')->get();
+        } catch (\Throwable $e) {
+            \Log::error('Reports users error: ' . $e->getMessage());
+            $users = collect();
+        }
         
         return view('admin.reports.users', [
-            'users' => $users
+            'users' => $users ?? collect()
         ]);
     }
     
     public function editUser($id)
     {
+        try {
         $user = User::findOrFail($id);
+        } catch (\Throwable $e) {
+            \Log::error('Reports editUser error: ' . $e->getMessage());
+            return redirect()->route('admin.reports.users')->with('error', 'User tidak ditemukan.');
+        }
 
         return view('admin.reports.users-edit', [
             'user' => $user,
@@ -148,6 +190,7 @@ class ReportController extends Controller
 
     public function updateUser(Request $request, $id)
     {
+        try {
         $user = User::findOrFail($id);
 
         $validated = $request->validate([
@@ -160,14 +203,22 @@ class ReportController extends Controller
         $user->save();
 
         return redirect()->route('admin.reports.users')->with('status', 'Pengguna berhasil diperbarui.');
+        } catch (\Throwable $e) {
+            \Log::error('Reports updateUser error: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memperbarui pengguna: ' . $e->getMessage());
+        }
     }
 
     public function destroyUser($id)
     {
+        try {
         $user = User::findOrFail($id);
         $user->delete();
-
         return redirect()->route('admin.reports.users')->with('status', 'Pengguna berhasil dihapus.');
+        } catch (\Throwable $e) {
+            \Log::error('Reports destroyUser error: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menghapus pengguna: ' . $e->getMessage());
+        }
     }
     
     /**
@@ -175,83 +226,94 @@ class ReportController extends Controller
      */
     public function photos()
     {
+        $photoReports = [];
+        
         try {
-            // Get all photos with stats from database - use more efficient query
-            $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get();
-            $photoReports = [];
+            $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get() ?: collect();
             
-            // Get all reactions grouped by photo_id for efficiency
+            // Get reactions
             $reactionsByPhoto = [];
             try {
-                $reactionsData = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
-                    ->groupBy('photo_id', 'reaction')
-                    ->get();
-                foreach ($reactionsData as $r) {
-                    if (!isset($reactionsByPhoto[$r->photo_id])) {
-                        $reactionsByPhoto[$r->photo_id] = [];
+                if (\Schema::hasTable('photo_reactions')) {
+                    $reactionsData = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
+                        ->groupBy('photo_id', 'reaction')
+                        ->get();
+                    
+                    foreach ($reactionsData as $r) {
+                        $photoId = (string)($r->photo_id ?? '');
+                        if ($photoId) {
+                            if (!isset($reactionsByPhoto[$photoId])) {
+                                $reactionsByPhoto[$photoId] = [];
+                            }
+                            $reactionsByPhoto[$photoId][] = [
+                                'reaction' => (string)($r->reaction ?? ''),
+                                'count' => (int)($r->count ?? 0)
+                            ];
+                        }
                     }
-                    $reactionsByPhoto[$r->photo_id][] = [
-                        'reaction' => $r->reaction,
-                        'count' => (int)$r->count
-                    ];
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 \Log::error('Error fetching reactions: ' . $e->getMessage());
             }
             
-            // Get all downloads grouped by photo_id
+            // Get downloads
             $downloadsByPhoto = [];
             try {
-                $downloadsData = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
-                    ->groupBy('photo_id')
-                    ->get();
-                foreach ($downloadsData as $d) {
-                    $downloadsByPhoto[$d->photo_id] = (int)$d->count;
+                if (\Schema::hasTable('download_logs')) {
+                    $downloadsData = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
+                        ->groupBy('photo_id')
+                        ->get();
+                    
+                    foreach ($downloadsData as $d) {
+                        $photoId = (string)($d->photo_id ?? '');
+                        if ($photoId) {
+                            $downloadsByPhoto[$photoId] = (int)($d->count ?? 0);
+                        }
+                    }
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 \Log::error('Error fetching downloads: ' . $e->getMessage());
             }
             
             foreach ($allPhotos as $photo) {
                 try {
+                    if (!$photo || !$photo->id) continue;
+                    
                     $photoId = (string)$photo->id;
                     
                     $photoReactions = $reactionsByPhoto[$photoId] ?? [];
                     $likes = 0;
                     $dislikes = 0;
                     foreach ($photoReactions as $r) {
-                        if ($r['reaction'] === 'like') {
-                            $likes += (int)$r['count'];
-                        } elseif ($r['reaction'] === 'dislike') {
-                            $dislikes += (int)$r['count'];
+                        if (($r['reaction'] ?? '') === 'like') {
+                            $likes += (int)($r['count'] ?? 0);
+                        } elseif (($r['reaction'] ?? '') === 'dislike') {
+                            $dislikes += (int)($r['count'] ?? 0);
                         }
                     }
                     $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
-                    
-                    $photoReports[] = [
-                        'photo' => $photo,
-                        'stats' => [
+            
+            $photoReports[] = [
+                'photo' => $photo,
+                'stats' => [
                             'likes' => (int)$likes,
                             'dislikes' => (int)$dislikes,
                             'downloads' => (int)$downloads
                         ]
                     ];
-                } catch (\Exception $e) {
-                    \Log::error('Error processing photo stats for photo ID ' . $photo->id . ': ' . $e->getMessage());
+                } catch (\Throwable $e) {
+                    \Log::error('Error processing photo: ' . $e->getMessage());
                     continue;
                 }
             }
-            
-            return view('admin.reports.photos', [
-                'photoReports' => $photoReports
-            ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Reports photos error: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
-            return view('admin.reports.photos', [
-                'photoReports' => []
-            ])->withErrors(['error' => 'Terjadi kesalahan saat memuat laporan foto.']);
         }
+        
+        return view('admin.reports.photos', [
+            'photoReports' => $photoReports
+        ]);
     }
     
     /**
@@ -260,21 +322,21 @@ class ReportController extends Controller
     public function exportUsersPdf()
     {
         try {
-            $users = User::orderBy('created_at', 'desc')->get();
-            
+        $users = User::orderBy('created_at', 'desc')->get();
+        
             if (class_exists('Barryvdh\DomPDF\Facade\Pdf')) {
-                $pdf = Pdf::loadView('admin.reports.pdf.users', [
-                    'users' => $users,
-                    'generatedAt' => now()->format('d F Y H:i')
-                ]);
-                
-                return $pdf->download('laporan-pengguna-' . date('Y-m-d') . '.pdf');
+        $pdf = Pdf::loadView('admin.reports.pdf.users', [
+            'users' => $users,
+            'generatedAt' => now()->format('d F Y H:i')
+        ]);
+        
+        return $pdf->download('laporan-pengguna-' . date('Y-m-d') . '.pdf');
             } else {
-                return back()->with('error', 'PDF library tidak tersedia. Silakan install dompdf.');
+                return back()->with('error', 'PDF library tidak tersedia.');
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Export users PDF error: ' . $e->getMessage());
-            return back()->with('error', 'Gagal mengekspor PDF: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengekspor PDF.');
         }
     }
     
@@ -284,49 +346,49 @@ class ReportController extends Controller
     public function exportPhotosPdf()
     {
         try {
-            // Get photos with stats from database
-            $photoReports = [];
-            $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get();
-            
-            foreach ($allPhotos as $photo) {
+        $photoReports = [];
+            $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get() ?: collect();
+        
+        foreach ($allPhotos as $photo) {
                 try {
+                    if (!$photo || !$photo->id) continue;
+                    
                     $likes = PhotoReaction::where('photo_id', (string)$photo->id)
-                        ->where('reaction', 'like')
-                        ->count();
-                    
+                ->where('reaction', 'like')
+                ->count();
+            
                     $dislikes = PhotoReaction::where('photo_id', (string)$photo->id)
-                        ->where('reaction', 'dislike')
-                        ->count();
-                    
+                ->where('reaction', 'dislike')
+                ->count();
+            
                     $downloads = DownloadLog::where('photo_id', (string)$photo->id)->count();
-                    
-                    $photoReports[] = [
-                        'photo' => $photo,
-                        'stats' => [
-                            'likes' => $likes,
-                            'dislikes' => $dislikes,
-                            'downloads' => $downloads
+            
+            $photoReports[] = [
+                'photo' => $photo,
+                'stats' => [
+                            'likes' => (int)$likes,
+                            'dislikes' => (int)$dislikes,
+                            'downloads' => (int)$downloads
                         ]
                     ];
-                } catch (\Exception $e) {
-                    \Log::error('Error processing photo stats: ' . $e->getMessage());
+                } catch (\Throwable $e) {
                     continue;
                 }
             }
             
             if (class_exists('Barryvdh\DomPDF\Facade\Pdf')) {
-                $pdf = Pdf::loadView('admin.reports.pdf.photos', [
-                    'photoReports' => $photoReports,
-                    'generatedAt' => now()->format('d F Y H:i')
-                ])->setPaper('a4', 'landscape');
-                
-                return $pdf->download('laporan-foto-galeri-' . date('Y-m-d') . '.pdf');
+        $pdf = Pdf::loadView('admin.reports.pdf.photos', [
+            'photoReports' => $photoReports,
+            'generatedAt' => now()->format('d F Y H:i')
+        ])->setPaper('a4', 'landscape');
+        
+        return $pdf->download('laporan-foto-galeri-' . date('Y-m-d') . '.pdf');
             } else {
-                return back()->with('error', 'PDF library tidak tersedia. Silakan install dompdf.');
+                return back()->with('error', 'PDF library tidak tersedia.');
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Export photos PDF error: ' . $e->getMessage());
-            return back()->with('error', 'Gagal mengekspor PDF: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengekspor PDF.');
         }
     }
 }
