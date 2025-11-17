@@ -30,11 +30,25 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label">Kategori</label>
-                <select name="category" class="form-select" required>
-                    <option value="">-- Pilih Kategori --</option>
+                <select name="category" class="form-select">
+                    <option value="">-- Pilih Kategori (Opsional) --</option>
                     @php
                         $categoriesPath = resource_path('data/umbrella_categories.json');
-                        $cats = file_exists($categoriesPath) ? json_decode(file_get_contents($categoriesPath), true) : [];
+                        $cats = [];
+                        if (file_exists($categoriesPath)) {
+                            $jsonContent = json_decode(file_get_contents($categoriesPath), true);
+                            if (is_array($jsonContent)) {
+                                // Check if it's an associative array (object) or indexed array
+                                if (array_keys($jsonContent) !== range(0, count($jsonContent) - 1)) {
+                                    // It's an object/associative array (umbrella categories structure)
+                                    // Only show umbrella categories (keys), not subcategories
+                                    $cats = array_keys($jsonContent);
+                                } else {
+                                    // It's a flat indexed array
+                                    $cats = $jsonContent;
+                                }
+                            }
+                        }
                     @endphp
                     @foreach($cats as $cat)
                         <option value="{{ $cat }}">{{ $cat }}</option>

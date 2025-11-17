@@ -650,7 +650,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
                 'title' => ['required','string','max:150'],
                 'category' => ['nullable','string','max:100'],
                 // Naikkan batas ukuran per foto menjadi 25MB agar tidak sering gagal
-                'photos.*' => ['nullable','image','mimes:jpeg,png,jpg,webp,gif','max:25600'],
+                'photos' => ['required', 'array', 'min:1', 'max:15'],
+                'photos.*' => ['required','image','mimes:jpeg,png,jpg,webp,gif','max:25600'],
             ]);
             $title = $validated['title'];
             $category = $validated['category'] ?? null;
