@@ -752,19 +752,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth:petugas')->group(functi
         $it->delete();
         return back()->with('status','Foto dihapus.');
     })->name('gallery.photo.destroy');
-
-    // Gallery
-    Route::get('/gallery', function () {
-        $dir = public_path('uploads/gallery');
-        $manifestPath = $dir . DIRECTORY_SEPARATOR . 'manifest.json';
-        $items = [];
-        if (is_file($manifestPath)) {
-            $items = json_decode(file_get_contents($manifestPath), true) ?: [];
-        }
-        // latest first
-        usort($items, function ($a, $b) { return strcmp($b['uploaded_at'] ?? '', $a['uploaded_at'] ?? ''); });
-        return view('admin.gallery.index', ['items' => $items]);
-    })->name('gallery.index');
     
     // Gallery Categories Management
     Route::prefix('gallery/categories')->name('gallery.categories.')->group(function () {
