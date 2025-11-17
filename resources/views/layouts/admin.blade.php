@@ -144,6 +144,7 @@
             <li><a class="{{ request()->is('admin/gallery') ? 'active' : '' }}" href="{{ route('admin.gallery.index') }}"><i class="ri-image-2-line"></i> Kelola Galeri</a></li>
             <li><a class="{{ request()->is('admin/gallery/categories*') ? 'active' : '' }}" href="{{ route('admin.gallery.categories.index') }}"><i class="ri-price-tag-3-line"></i> Kategori Galeri</a></li>
             <li><a class="{{ request()->is('admin/reports*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}"><i class="ri-bar-chart-box-line"></i> Laporan</a></li>
+            <li><a class="{{ request()->is('admin/gallery/report*') ? 'active' : '' }}" href="{{ route('admin.gallery.report') }}"><i class="ri-bar-chart-2-line"></i> Laporan Interaksi</a></li>
             @if(auth('petugas')->check() && auth('petugas')->user()->isAdmin())
                 <li><a class="{{ request()->is('admin/users*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}"><i class="ri-user-settings-line"></i> Manajemen Admin</a></li>
             @endif

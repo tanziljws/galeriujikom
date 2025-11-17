@@ -145,7 +145,7 @@
                     <a class="btn btn-primary" href="{{ route('admin.gallery.create') }}"><i class="ri-upload-2-line me-1"></i> Upload Foto</a>
                     <a class="btn btn-primary" href="{{ route('admin.guru-staf.create') }}"><i class="ri-user-add-line me-1"></i> Upload Guru/Staf</a>
                     <a class="btn btn-primary" href="{{ route('admin.gallery.categories.index') }}"><i class="ri-folders-line me-1"></i> Kategori Galeri</a>
-                    <a class="btn btn-primary" href="{{ route('admin.reports.photos') }}"><i class="ri-bar-chart-2-line me-1"></i> Laporan Galeri</a>
+                    <a class="btn btn-primary" href="{{ route('admin.gallery.report') }}"><i class="ri-bar-chart-2-line me-1"></i> Laporan Galeri</a>
                     <a class="btn btn-primary" href="{{ route('admin.users.index') }}"><i class="ri-shield-user-line me-1"></i> Manajemen Admin</a>
                 <canvas id="chartActivity" height="120"></canvas>
             </div>
