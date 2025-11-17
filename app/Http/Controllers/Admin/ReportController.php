@@ -21,140 +21,110 @@ class ReportController extends Controller
     {
         // Initialize all variables with safe defaults
         $totalUsers = 0;
-        $recentUsers = collect();
+        $recentUsers = [];
         $photoReports = [];
         
         try {
-            // Get user statistics - with full error handling
+            // Get user statistics
             try {
-                if (class_exists(User::class)) {
-                    $totalUsers = (int)User::count();
-                    $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get() ?: collect();
-                }
-            } catch (\Throwable $e) {
-                \Log::error('Error fetching users in reports: ' . $e->getMessage());
+                $totalUsers = User::count();
+            } catch (\Exception $e) {
                 $totalUsers = 0;
-                $recentUsers = collect();
             }
             
-            // Get photos - with full error handling
-            $photos = collect();
             try {
-                if (class_exists(GalleryItem::class)) {
-                    $photos = GalleryItem::whereNotNull('filename')->limit(100)->get() ?: collect();
-                }
-            } catch (\Throwable $e) {
-                \Log::error('Error fetching photos in reports: ' . $e->getMessage());
-                $photos = collect();
+                $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get()->toArray();
+            } catch (\Exception $e) {
+                $recentUsers = [];
             }
             
-            // Get reactions - with full error handling
+            // Get photos
+            $photos = [];
+            try {
+                $photos = GalleryItem::whereNotNull('filename')->limit(100)->get()->toArray();
+            } catch (\Exception $e) {
+                $photos = [];
+            }
+            
+            // Get reactions - simplified query
             $reactionsByPhoto = [];
             try {
-                if (class_exists(PhotoReaction::class) && Schema::hasTable('photo_reactions')) {
-                    $reactionsData = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
-                        ->groupBy('photo_id', 'reaction')
-                        ->get();
-                    
-                    foreach ($reactionsData as $r) {
-                        $photoId = (string)($r->photo_id ?? '');
-                        if ($photoId) {
-                            if (!isset($reactionsByPhoto[$photoId])) {
-                                $reactionsByPhoto[$photoId] = [];
-                            }
-                            $reactionsByPhoto[$photoId][] = [
-                                'reaction' => (string)($r->reaction ?? ''),
-                                'count' => (int)($r->count ?? 0)
-                            ];
+                $reactions = PhotoReaction::all();
+                foreach ($reactions as $r) {
+                    $photoId = (string)($r->photo_id ?? '');
+                    if ($photoId) {
+                        if (!isset($reactionsByPhoto[$photoId])) {
+                            $reactionsByPhoto[$photoId] = ['like' => 0, 'dislike' => 0];
+                        }
+                        if ($r->reaction === 'like') {
+                            $reactionsByPhoto[$photoId]['like']++;
+                        } elseif ($r->reaction === 'dislike') {
+                            $reactionsByPhoto[$photoId]['dislike']++;
                         }
                     }
                 }
-            } catch (\Throwable $e) {
-                \Log::error('Error fetching reactions in reports: ' . $e->getMessage());
+            } catch (\Exception $e) {
+                // Ignore
             }
             
-            // Get downloads - with full error handling
+            // Get downloads - simplified query
             $downloadsByPhoto = [];
             try {
-                if (class_exists(DownloadLog::class) && Schema::hasTable('download_logs')) {
-                    $downloadsData = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
-                        ->groupBy('photo_id')
-                        ->get();
-                    
-                    foreach ($downloadsData as $d) {
-                        $photoId = (string)($d->photo_id ?? '');
-                        if ($photoId) {
-                            $downloadsByPhoto[$photoId] = (int)($d->count ?? 0);
-                        }
+                $downloads = DownloadLog::all();
+                foreach ($downloads as $d) {
+                    $photoId = (string)($d->photo_id ?? '');
+                    if ($photoId) {
+                        $downloadsByPhoto[$photoId] = ($downloadsByPhoto[$photoId] ?? 0) + 1;
                     }
                 }
-            } catch (\Throwable $e) {
-                \Log::error('Error fetching downloads in reports: ' . $e->getMessage());
+            } catch (\Exception $e) {
+                // Ignore
             }
             
             // Process photos
-            if ($photos && $photos->count() > 0) {
-                foreach ($photos as $photo) {
-                    try {
-                        if (!$photo || !$photo->id) {
-                            continue;
-                        }
-                        
-                        $photoId = (string)$photo->id;
-                        
-                        $photoReactions = $reactionsByPhoto[$photoId] ?? [];
-                        $likes = 0;
-                        $dislikes = 0;
-                        
-                        foreach ($photoReactions as $r) {
-                            $reaction = $r['reaction'] ?? '';
-                            $count = (int)($r['count'] ?? 0);
-                            if ($reaction === 'like') {
-                                $likes += $count;
-                            } elseif ($reaction === 'dislike') {
-                                $dislikes += $count;
-                            }
-                        }
-                        
-                        $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
-            
-            $photoReports[] = [
-                'photo' => $photo,
-                'stats' => [
-                                'likes' => (int)$likes,
-                                'dislikes' => (int)$dislikes,
-                                'downloads' => (int)$downloads
-                            ]
-                        ];
-                    } catch (\Throwable $e) {
-                        \Log::error('Error processing photo stats: ' . $e->getMessage());
-                        continue;
-                    }
+            foreach ($photos as $photo) {
+                try {
+                    $photoId = (string)($photo['id'] ?? $photo->id ?? '');
+                    if (!$photoId) continue;
+                    
+                    $likes = (int)($reactionsByPhoto[$photoId]['like'] ?? 0);
+                    $dislikes = (int)($reactionsByPhoto[$photoId]['dislike'] ?? 0);
+                    $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
+                    
+                    $photoReports[] = [
+                        'photo' => is_array($photo) ? (object)$photo : $photo,
+                        'stats' => [
+                            'likes' => $likes,
+                            'dislikes' => $dislikes,
+                            'downloads' => $downloads
+                        ]
+                    ];
+                } catch (\Exception $e) {
+                    continue;
                 }
             }
             
-            // Sort safely
-            try {
-        usort($photoReports, function($a, $b) {
-                    $totalA = (int)(($a['stats']['likes'] ?? 0) + ($a['stats']['dislikes'] ?? 0) + ($a['stats']['downloads'] ?? 0));
-                    $totalB = (int)(($b['stats']['likes'] ?? 0) + ($b['stats']['dislikes'] ?? 0) + ($b['stats']['downloads'] ?? 0));
-            return $totalB - $totalA;
-        });
-            } catch (\Throwable $e) {
-                \Log::error('Error sorting photo reports: ' . $e->getMessage());
-            }
+            // Sort
+            usort($photoReports, function($a, $b) {
+                $totalA = (int)(($a['stats']['likes'] ?? 0) + ($a['stats']['dislikes'] ?? 0) + ($a['stats']['downloads'] ?? 0));
+                $totalB = (int)(($b['stats']['likes'] ?? 0) + ($b['stats']['dislikes'] ?? 0) + ($b['stats']['downloads'] ?? 0));
+                return $totalB - $totalA;
+            });
             
-        } catch (\Throwable $e) {
-            \Log::error('Reports index fatal error: ' . $e->getMessage());
-            \Log::error('File: ' . $e->getFile() . ' Line: ' . $e->getLine());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
+        } catch (\Exception $e) {
+            // Fallback to empty data
+            $totalUsers = 0;
+            $recentUsers = [];
+            $photoReports = [];
         }
         
-        // Always return view with safe data
+        // Convert recentUsers array back to collection for view compatibility
+        $recentUsersCollection = collect($recentUsers);
+        
         return view('admin.reports.index', [
-            'totalUsers' => (int)($totalUsers ?? 0),
-            'recentUsers' => $recentUsers ?? collect(),
-            'photoReports' => $photoReports ?? []
+            'totalUsers' => $totalUsers,
+            'recentUsers' => $recentUsersCollection,
+            'photoReports' => $photoReports
         ]);
     }
     

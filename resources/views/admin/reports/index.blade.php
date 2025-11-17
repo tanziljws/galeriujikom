@@ -27,7 +27,7 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="text-muted mb-1">Total Pengguna</h6>
-              <h3 class="mb-0">{{ $totalUsers }}</h3>
+              <h3 class="mb-0">{{ $totalUsers ?? 0 }}</h3>
             </div>
           </div>
         </div>
@@ -63,7 +63,7 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="text-muted mb-1">Total Foto</h6>
-              <h3 class="mb-0">{{ count($photoReports) }}</h3>
+              <h3 class="mb-0">{{ count($photoReports ?? []) }}</h3>
             </div>
           </div>
         </div>
