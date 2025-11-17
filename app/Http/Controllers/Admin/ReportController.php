@@ -9,8 +9,6 @@ use App\Models\GalleryItem;
 use App\Models\PhotoReaction;
 use App\Models\DownloadLog;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -21,68 +19,77 @@ class ReportController extends Controller
     {
         // Initialize all variables with safe defaults
         $totalUsers = 0;
-        $recentUsers = [];
+        $recentUsers = collect();
         $photoReports = [];
         
         try {
-            // Get user statistics
+            // Get user statistics - simple and safe
             try {
-                $totalUsers = User::count();
+                $totalUsers = (int) User::count();
             } catch (\Exception $e) {
                 $totalUsers = 0;
             }
             
             try {
-                $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get()->toArray();
+                $recentUsers = User::orderBy('created_at', 'desc')->take(10)->get();
+                if (!$recentUsers) {
+                    $recentUsers = collect();
+                }
             } catch (\Exception $e) {
-                $recentUsers = [];
+                $recentUsers = collect();
             }
             
-            // Get photos - keep as objects for view compatibility
-            $photos = [];
+            // Get photos - simple and safe
+            $photos = collect();
             try {
                 $photos = GalleryItem::whereNotNull('filename')->limit(100)->get();
+                if (!$photos) {
+                    $photos = collect();
+                }
             } catch (\Exception $e) {
                 $photos = collect();
             }
             
-            // Get reactions - simplified query
+            // Get reactions - use chunk to avoid memory issues
             $reactionsByPhoto = [];
             try {
-                $reactions = PhotoReaction::all();
-                foreach ($reactions as $r) {
-                    $photoId = (string)($r->photo_id ?? '');
-                    if ($photoId) {
-                        if (!isset($reactionsByPhoto[$photoId])) {
-                            $reactionsByPhoto[$photoId] = ['like' => 0, 'dislike' => 0];
-                        }
-                        if ($r->reaction === 'like') {
-                            $reactionsByPhoto[$photoId]['like']++;
-                        } elseif ($r->reaction === 'dislike') {
-                            $reactionsByPhoto[$photoId]['dislike']++;
+                PhotoReaction::chunk(100, function ($reactions) use (&$reactionsByPhoto) {
+                    foreach ($reactions as $r) {
+                        $photoId = (string)($r->photo_id ?? '');
+                        if ($photoId) {
+                            if (!isset($reactionsByPhoto[$photoId])) {
+                                $reactionsByPhoto[$photoId] = ['like' => 0, 'dislike' => 0];
+                            }
+                            $reaction = $r->reaction ?? '';
+                            if ($reaction === 'like') {
+                                $reactionsByPhoto[$photoId]['like']++;
+                            } elseif ($reaction === 'dislike') {
+                                $reactionsByPhoto[$photoId]['dislike']++;
+                            }
                         }
                     }
-                }
+                });
             } catch (\Exception $e) {
-                // Ignore
+                // Ignore errors
             }
             
-            // Get downloads - simplified query
+            // Get downloads - use chunk to avoid memory issues
             $downloadsByPhoto = [];
             try {
-                $downloads = DownloadLog::all();
-                foreach ($downloads as $d) {
-                    $photoId = (string)($d->photo_id ?? '');
-                    if ($photoId) {
-                        $downloadsByPhoto[$photoId] = ($downloadsByPhoto[$photoId] ?? 0) + 1;
+                DownloadLog::chunk(100, function ($downloads) use (&$downloadsByPhoto) {
+                    foreach ($downloads as $d) {
+                        $photoId = (string)($d->photo_id ?? '');
+                        if ($photoId) {
+                            $downloadsByPhoto[$photoId] = ($downloadsByPhoto[$photoId] ?? 0) + 1;
+                        }
                     }
-                }
+                });
             } catch (\Exception $e) {
-                // Ignore
+                // Ignore errors
             }
             
             // Process photos
-            if ($photos && method_exists($photos, 'count') && $photos->count() > 0) {
+            if ($photos->isNotEmpty()) {
                 foreach ($photos as $photo) {
                     try {
                         if (!$photo || !isset($photo->id)) {
@@ -116,19 +123,17 @@ class ReportController extends Controller
                 return $totalB - $totalA;
             });
             
-        } catch (\Exception $e) {
-            // Fallback to empty data
+        } catch (\Throwable $e) {
+            // Fallback to empty data on any error
             $totalUsers = 0;
-            $recentUsers = [];
+            $recentUsers = collect();
             $photoReports = [];
         }
         
-        // Convert recentUsers array back to collection for view compatibility
-        $recentUsersCollection = collect($recentUsers);
-        
+        // Always return view with safe data
         return view('admin.reports.index', [
             'totalUsers' => $totalUsers,
-            'recentUsers' => $recentUsersCollection,
+            'recentUsers' => $recentUsers,
             'photoReports' => $photoReports
         ]);
     }
@@ -139,23 +144,21 @@ class ReportController extends Controller
     public function users()
     {
         try {
-        $users = User::orderBy('created_at', 'desc')->get();
-        } catch (\Throwable $e) {
-            \Log::error('Reports users error: ' . $e->getMessage());
+            $users = User::orderBy('created_at', 'desc')->get();
+        } catch (\Exception $e) {
             $users = collect();
         }
         
         return view('admin.reports.users', [
-            'users' => $users ?? collect()
+            'users' => $users
         ]);
     }
     
     public function editUser($id)
     {
         try {
-        $user = User::findOrFail($id);
-        } catch (\Throwable $e) {
-            \Log::error('Reports editUser error: ' . $e->getMessage());
+            $user = User::findOrFail($id);
+        } catch (\Exception $e) {
             return redirect()->route('admin.reports.users')->with('error', 'User tidak ditemukan.');
         }
 
@@ -167,33 +170,31 @@ class ReportController extends Controller
     public function updateUser(Request $request, $id)
     {
         try {
-        $user = User::findOrFail($id);
+            $user = User::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => ['required','string','max:255'],
-            'email' => ['required','email','max:255','unique:users,email,'.$user->id],
-        ]);
+            $validated = $request->validate([
+                'name' => ['required','string','max:255'],
+                'email' => ['required','email','max:255','unique:users,email,'.$user->id],
+            ]);
 
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
-        $user->save();
+            $user->name = $validated['name'];
+            $user->email = $validated['email'];
+            $user->save();
 
-        return redirect()->route('admin.reports.users')->with('status', 'Pengguna berhasil diperbarui.');
-        } catch (\Throwable $e) {
-            \Log::error('Reports updateUser error: ' . $e->getMessage());
-            return back()->with('error', 'Gagal memperbarui pengguna: ' . $e->getMessage());
+            return redirect()->route('admin.reports.users')->with('status', 'Pengguna berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal memperbarui pengguna.');
         }
     }
 
     public function destroyUser($id)
     {
         try {
-        $user = User::findOrFail($id);
-        $user->delete();
-        return redirect()->route('admin.reports.users')->with('status', 'Pengguna berhasil dihapus.');
-        } catch (\Throwable $e) {
-            \Log::error('Reports destroyUser error: ' . $e->getMessage());
-            return back()->with('error', 'Gagal menghapus pengguna: ' . $e->getMessage());
+            $user = User::findOrFail($id);
+            $user->delete();
+            return redirect()->route('admin.reports.users')->with('status', 'Pengguna berhasil dihapus.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus pengguna.');
         }
     }
     
@@ -205,86 +206,70 @@ class ReportController extends Controller
         $photoReports = [];
         
         try {
-            $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get() ?: collect();
+            $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get();
             
             // Get reactions
             $reactionsByPhoto = [];
             try {
-                if (Schema::hasTable('photo_reactions')) {
-                    $reactionsData = PhotoReaction::select('photo_id', 'reaction', DB::raw('COUNT(*) as count'))
-                        ->groupBy('photo_id', 'reaction')
-                        ->get();
-                    
-                    foreach ($reactionsData as $r) {
+                PhotoReaction::chunk(100, function ($reactions) use (&$reactionsByPhoto) {
+                    foreach ($reactions as $r) {
                         $photoId = (string)($r->photo_id ?? '');
                         if ($photoId) {
                             if (!isset($reactionsByPhoto[$photoId])) {
-                                $reactionsByPhoto[$photoId] = [];
+                                $reactionsByPhoto[$photoId] = ['like' => 0, 'dislike' => 0];
                             }
-                            $reactionsByPhoto[$photoId][] = [
-                                'reaction' => (string)($r->reaction ?? ''),
-                                'count' => (int)($r->count ?? 0)
-                            ];
+                            $reaction = $r->reaction ?? '';
+                            if ($reaction === 'like') {
+                                $reactionsByPhoto[$photoId]['like']++;
+                            } elseif ($reaction === 'dislike') {
+                                $reactionsByPhoto[$photoId]['dislike']++;
+                            }
                         }
                     }
-                }
-            } catch (\Throwable $e) {
-                \Log::error('Error fetching reactions: ' . $e->getMessage());
+                });
+            } catch (\Exception $e) {
+                // Ignore
             }
             
             // Get downloads
             $downloadsByPhoto = [];
             try {
-                if (Schema::hasTable('download_logs')) {
-                    $downloadsData = DownloadLog::select('photo_id', DB::raw('COUNT(*) as count'))
-                        ->groupBy('photo_id')
-                        ->get();
-                    
-                    foreach ($downloadsData as $d) {
+                DownloadLog::chunk(100, function ($downloads) use (&$downloadsByPhoto) {
+                    foreach ($downloads as $d) {
                         $photoId = (string)($d->photo_id ?? '');
                         if ($photoId) {
-                            $downloadsByPhoto[$photoId] = (int)($d->count ?? 0);
+                            $downloadsByPhoto[$photoId] = ($downloadsByPhoto[$photoId] ?? 0) + 1;
                         }
                     }
-                }
-            } catch (\Throwable $e) {
-                \Log::error('Error fetching downloads: ' . $e->getMessage());
+                });
+            } catch (\Exception $e) {
+                // Ignore
             }
             
             foreach ($allPhotos as $photo) {
                 try {
-                    if (!$photo || !$photo->id) continue;
+                    if (!$photo || !isset($photo->id)) continue;
                     
                     $photoId = (string)$photo->id;
                     
-                    $photoReactions = $reactionsByPhoto[$photoId] ?? [];
-                    $likes = 0;
-                    $dislikes = 0;
-                    foreach ($photoReactions as $r) {
-                        if (($r['reaction'] ?? '') === 'like') {
-                            $likes += (int)($r['count'] ?? 0);
-                        } elseif (($r['reaction'] ?? '') === 'dislike') {
-                            $dislikes += (int)($r['count'] ?? 0);
-                        }
-                    }
+                    $likes = (int)($reactionsByPhoto[$photoId]['like'] ?? 0);
+                    $dislikes = (int)($reactionsByPhoto[$photoId]['dislike'] ?? 0);
                     $downloads = (int)($downloadsByPhoto[$photoId] ?? 0);
-            
-            $photoReports[] = [
-                'photo' => $photo,
-                'stats' => [
-                            'likes' => (int)$likes,
-                            'dislikes' => (int)$dislikes,
-                            'downloads' => (int)$downloads
+                    
+                    $photoReports[] = [
+                        'photo' => $photo,
+                        'stats' => [
+                            'likes' => $likes,
+                            'dislikes' => $dislikes,
+                            'downloads' => $downloads
                         ]
                     ];
-                } catch (\Throwable $e) {
-                    \Log::error('Error processing photo: ' . $e->getMessage());
+                } catch (\Exception $e) {
                     continue;
                 }
             }
-        } catch (\Throwable $e) {
-            \Log::error('Reports photos error: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
+        } catch (\Exception $e) {
+            // Fallback to empty
         }
         
         return view('admin.reports.photos', [
@@ -298,20 +283,19 @@ class ReportController extends Controller
     public function exportUsersPdf()
     {
         try {
-        $users = User::orderBy('created_at', 'desc')->get();
-        
+            $users = User::orderBy('created_at', 'desc')->get();
+            
             if (class_exists('Barryvdh\DomPDF\Facade\Pdf')) {
-        $pdf = Pdf::loadView('admin.reports.pdf.users', [
-            'users' => $users,
-            'generatedAt' => now()->format('d F Y H:i')
-        ]);
-        
-        return $pdf->download('laporan-pengguna-' . date('Y-m-d') . '.pdf');
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.reports.pdf.users', [
+                    'users' => $users,
+                    'generatedAt' => now()->format('d F Y H:i')
+                ]);
+                
+                return $pdf->download('laporan-pengguna-' . date('Y-m-d') . '.pdf');
             } else {
                 return back()->with('error', 'PDF library tidak tersedia.');
             }
-        } catch (\Throwable $e) {
-            \Log::error('Export users PDF error: ' . $e->getMessage());
+        } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengekspor PDF.');
         }
     }
@@ -322,48 +306,47 @@ class ReportController extends Controller
     public function exportPhotosPdf()
     {
         try {
-        $photoReports = [];
-            $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get() ?: collect();
-        
-        foreach ($allPhotos as $photo) {
+            $photoReports = [];
+            $allPhotos = GalleryItem::whereNotNull('filename')->orderBy('created_at', 'desc')->get();
+            
+            foreach ($allPhotos as $photo) {
                 try {
-                    if (!$photo || !$photo->id) continue;
+                    if (!$photo || !isset($photo->id)) continue;
                     
                     $likes = PhotoReaction::where('photo_id', (string)$photo->id)
-                ->where('reaction', 'like')
-                ->count();
-            
+                        ->where('reaction', 'like')
+                        ->count();
+                    
                     $dislikes = PhotoReaction::where('photo_id', (string)$photo->id)
-                ->where('reaction', 'dislike')
-                ->count();
-            
+                        ->where('reaction', 'dislike')
+                        ->count();
+                    
                     $downloads = DownloadLog::where('photo_id', (string)$photo->id)->count();
-            
-            $photoReports[] = [
-                'photo' => $photo,
-                'stats' => [
+                    
+                    $photoReports[] = [
+                        'photo' => $photo,
+                        'stats' => [
                             'likes' => (int)$likes,
                             'dislikes' => (int)$dislikes,
                             'downloads' => (int)$downloads
                         ]
                     ];
-                } catch (\Throwable $e) {
+                } catch (\Exception $e) {
                     continue;
                 }
             }
             
             if (class_exists('Barryvdh\DomPDF\Facade\Pdf')) {
-        $pdf = Pdf::loadView('admin.reports.pdf.photos', [
-            'photoReports' => $photoReports,
-            'generatedAt' => now()->format('d F Y H:i')
-        ])->setPaper('a4', 'landscape');
-        
-        return $pdf->download('laporan-foto-galeri-' . date('Y-m-d') . '.pdf');
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.reports.pdf.photos', [
+                    'photoReports' => $photoReports,
+                    'generatedAt' => now()->format('d F Y H:i')
+                ])->setPaper('a4', 'landscape');
+                
+                return $pdf->download('laporan-foto-galeri-' . date('Y-m-d') . '.pdf');
             } else {
                 return back()->with('error', 'PDF library tidak tersedia.');
             }
-        } catch (\Throwable $e) {
-            \Log::error('Export photos PDF error: ' . $e->getMessage());
+        } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengekspor PDF.');
         }
     }
