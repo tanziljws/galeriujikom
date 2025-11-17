@@ -194,16 +194,27 @@
           @php
             $photo = $report['photo'] ?? null;
             $stats = $report['stats'] ?? ['likes' => 0, 'dislikes' => 0, 'downloads' => 0];
-            $url = ($photo && $photo->filename) ? asset('uploads/gallery/'.$photo->filename) : (($photo && $photo->image_path) ? asset('storage/'.$photo->image_path) : '');
+            $url = '';
+            if ($photo) {
+                if (isset($photo->filename) && $photo->filename) {
+                    $url = asset('uploads/gallery/'.$photo->filename);
+                } elseif (isset($photo->image_path) && $photo->image_path) {
+                    $url = asset('storage/'.$photo->image_path);
+                }
+            }
+            $photoTitle = $photo && isset($photo->title) ? $photo->title : 'Tanpa Judul';
+            $photoCategory = $photo && isset($photo->category) ? $photo->category : 'Lainnya';
           @endphp
           <div class="col-md-6 col-lg-4">
             <div class="card h-100 shadow-sm">
+              @if($url)
               <div class="ratio ratio-16x9">
-                <img src="{{ $url }}" alt="{{ $photo->title ?? 'Tanpa Judul' }}" style="object-fit: cover;">
+                <img src="{{ $url }}" alt="{{ $photoTitle }}" style="object-fit: cover;">
               </div>
+              @endif
               <div class="card-body">
-                <h6 class="card-title">{{ $photo->title ?? 'Tanpa Judul' }}</h6>
-                <p class="card-text text-muted small">{{ $photo->category ?? 'Lainnya' }}</p>
+                <h6 class="card-title">{{ $photoTitle }}</h6>
+                <p class="card-text text-muted small">{{ $photoCategory }}</p>
                 <div class="d-flex justify-content-between text-muted small">
                   <span><i class="ri-heart-fill text-danger"></i> {{ $stats['likes'] ?? 0 }}</span>
                   <span><i class="ri-dislike-fill text-warning"></i> {{ $stats['dislikes'] ?? 0 }}</span>
