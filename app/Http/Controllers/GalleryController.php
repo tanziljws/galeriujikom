@@ -25,10 +25,11 @@ class GalleryController extends Controller
                 try {
                     $jsonContent = file_get_contents($categoriesPath);
                     $decoded = json_decode($jsonContent, true);
-                    // Handle both flat array and nested structure
+                    // Handle both flat array and nested structure (object)
                     if (is_array($decoded)) {
-                        // If it's a nested structure (umbrella categories), flatten it
-                        if (isset($decoded[0]) && is_array($decoded[0])) {
+                        // Check if it's an associative array (object) or indexed array
+                        if (array_keys($decoded) !== range(0, count($decoded) - 1)) {
+                            // It's an object/associative array (umbrella categories structure)
                             $categories = [];
                             foreach ($decoded as $umbrella => $subcats) {
                                 if (is_array($subcats)) {
@@ -38,6 +39,7 @@ class GalleryController extends Controller
                                 }
                             }
                         } else {
+                            // It's a flat indexed array
                             $categories = $decoded;
                         }
                     }
