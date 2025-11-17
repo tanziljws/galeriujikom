@@ -4,7 +4,6 @@
 
 @push('styles')
 <style>
-<<<<<<< HEAD
     /* Hero untuk halaman informasi - lebih kecil dan pill shape */
     .info-hero { background: linear-gradient(135deg, #E8F1F8 0%, #D4E4F1 100%); color: #1E3A8A; padding: 1.5rem 0 1.25rem; position: relative; overflow: hidden; border-radius: 0 0 50px 50px; }
     .info-hero:after { content:""; position:absolute; right:-60px; top:-60px; width:260px; height:260px; border-radius:50%; background: rgba(30,58,138,.05); filter: blur(2px); }
@@ -17,22 +16,9 @@
     .content-card { background: var(--white); border-radius:16px; border:1px solid rgba(31,78,121,.12); box-shadow:0 12px 24px rgba(0,0,0,.06); padding:1.5rem; }
     .content-card p { margin-bottom: .85rem; line-height:1.8; color: var(--dark-gray); }
     .content-card h2, .content-card h3, .content-card h4 { color: var(--primary-blue); margin-top:1rem; font-weight:800; }
-=======
-    /* Hero untuk halaman informasi */
-    .info-hero { background: linear-gradient(135deg, var(--soft-blue) 0%, var(--primary-blue) 100%); color: var(--white); padding: 3rem 0 2.25rem; position: relative; overflow: hidden; }
-    .info-hero:after { content:""; position:absolute; right:-60px; top:-60px; width:260px; height:260px; border-radius:50%; background: rgba(255,255,255,.08); filter: blur(2px); }
-    .info-crumb { color: rgba(255,255,255,.9); text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:.4rem; }
-    .info-crumb:hover { text-decoration: underline; }
-    .meta-chips { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.5rem; }
-    .meta-chips .chip { background: rgba(255,255,255,.18); color: var(--white); border:1px solid rgba(255,255,255,.35); }
-    .detail-img { width:100%; height:auto; border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.08); }
-    .content-card { background: var(--white); border-radius:16px; border:1px solid rgba(31,78,121,.12); box-shadow:0 12px 24px rgba(0,0,0,.06); padding:1.25rem 1.25rem; }
-    .content-card p { margin-bottom: .85rem; line-height:1.8; color: var(--dark-gray); }
-    .content-card h2, .content-card h3, .content-card h4 { color: var(--primary-blue); margin-top:1rem; font-weight:800; }
     .related-item { background: var(--light-gray); border:1px solid rgba(31,78,121,.12); border-radius:12px; padding:.6rem; transition: transform .15s ease, box-shadow .2s ease; }
     .related-item:hover { transform: translateY(-3px); box-shadow:0 12px 24px rgba(0,0,0,.08); }
     .related-thumb { width:92px; height:72px; object-fit:cover; border-radius:10px; }
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
 </style>
 @endpush
 
@@ -43,11 +29,7 @@
             <a href="{{ route('information') }}" class="info-crumb mb-2">
                 <i class="fas fa-arrow-left"></i> Kembali ke Informasi
             </a>
-<<<<<<< HEAD
             <h1 class="info-title">{{ $info['title'] }}</h1>
-=======
-            <h1 class="fw-bold" style="max-width:900px; line-height:1.2;">{{ $info['title'] }}</h1>
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
             <div class="meta-chips">
                 <span class="chip"><i class="fas fa-tag"></i> {{ $info['category'] }}</span>
                 <span class="chip"><i class="fas fa-calendar"></i> {{ date('d M Y', strtotime($info['date'])) }}</span>
@@ -56,16 +38,6 @@
     </div>
 
     <!-- Detail Content -->
-<<<<<<< HEAD
-    <section class="py-4">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-10 col-xl-9">
-                    <div class="section-soft accented decor-gradient-top p-3 p-md-4">
-                        <img src="{{ $info['image'] }}" alt="{{ $info['title'] }}" class="detail-img mb-3">
-                        <div class="content-card">
-                            {!! nl2br(e($info['content'])) !!}
-=======
     <section class="section-fullscreen mb-0 section-alt py-3">
         <div class="container py-4 section-soft accented decor-gradient-top">
             <div class="row g-4">
@@ -92,7 +64,6 @@
                             @empty
                                 <div class="text-muted small">Belum ada informasi terkait.</div>
                             @endforelse
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
                         </div>
                     </div>
                 </div>

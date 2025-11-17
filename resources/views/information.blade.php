@@ -30,7 +30,6 @@
     <section class="section-fullscreen mb-4 section-alt py-3">
         <div class="container section-soft accented decor-gradient-top">
             <h2 class="vm-title-center">Semua Informasi</h2>
-<<<<<<< HEAD
             
             @if($informations->isEmpty())
                 <div class="text-center py-5">
@@ -69,47 +68,6 @@
                     @endforeach
                 </div>
             @endif
-=======
-            <div class="row g-4">
-                @foreach($informations as $info)
-                <div class="col-md-6 col-lg-4">
-                    <div class="card border-0 h-100 card-elevated shadow-animate">
-                        <div class="ratio ratio-16x9">
-                            <img src="{{ $info['image'] }}" alt="{{ $info['title'] }}" class="w-100 h-100 object-fit-cover">
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                @php
-                                    $badge = 'bg-primary';
-                                    if ($info['category'] === 'Pendaftaran') $badge = 'bg-danger';
-                                    elseif ($info['category'] === 'Akademik') $badge = 'bg-success';
-                                    elseif ($info['category'] === 'Kerjasama') $badge = 'bg-info';
-                                    elseif ($info['category'] === 'Prestasi') $badge = 'bg-warning text-dark';
-                                @endphp
-                                <span class="badge rounded-pill {{ $badge }}">{{ $info['category'] }}</span>
-                                <span class="text-muted small">{{ date('d M Y', strtotime($info['date'])) }}</span>
-                            </div>
-                            <h3 class="h6 fw-bold text-dark mb-2">{{ $info['title'] }}</h3>
-                            <p class="text-muted small mb-3">{{ \Illuminate\Support\Str::limit($info['description'], 100) }}</p>
-                            <a href="{{ route('information.show', $info['id']) }}" class="link-primary fw-semibold small">Selengkapnya →</a>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section (keep distinct gradient) -->
-    <section class="py-5 gradient-bg text-white">
-        <div class="container text-center">
-            <h2 class="h3 fw-bold mb-2">Tertarik Bergabung dengan SMKN 4 Bogor?</h2>
-            <p class="lead mb-3">Daftarkan diri Anda sekarang dan jadilah bagian dari keluarga besar SMKN 4 Bogor</p>
-            <div class="d-flex justify-content-center gap-2">
-                <a href="#" class="btn btn-light text-primary fw-semibold px-4">Daftar Sekarang</a>
-                <a href="#" class="btn btn-outline-light fw-semibold px-4">Hubungi Kami</a>
-            </div>
->>>>>>> 5a40c5ea8397b32a372b6c524bd6421ff676df4b
         </div>
     </section>
 @endsection
