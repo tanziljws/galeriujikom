@@ -19,45 +19,6 @@
       <div class="alert alert-success mb-3">{{ session('status') }}</div>
     @endif
 
-    <!-- Filter Form -->
-    <div class="mb-4">
-        <form action="{{ route('admin.agendas.index') }}" method="GET" class="row g-3">
-            <div class="col-md-12">
-                <select name="month" class="form-select" onchange="this.form.submit()" aria-label="Filter berdasarkan bulan">
-                    <option value="">Semua Bulan</option>
-                    @php
-                        $months = [
-                            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
-                            '04' => 'April', '05' => 'Mei', '06' => 'Juni',
-                            '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
-                            '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
-                        ];
-                        $selectedMonth = request('month');
-                    @endphp
-                    @foreach($months as $key => $month)
-                        <option value="{{ $key }}" {{ $selectedMonth == $key ? 'selected' : '' }}>{{ $month }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </form>
-        
-        @if(request('month'))
-            <div class="mt-2">
-                <small class="text-muted">
-                    Menampilkan: 
-                    @if(request('month'))
-                        <span class="badge bg-secondary ms-1">
-                            <i class="ri-calendar-line me-1"></i>{{ $months[request('month')] ?? 'Bulan ' . request('month') }}
-                        </span>
-                    @endif
-                    <a href="{{ route('admin.agendas.index') }}" class="text-danger ms-2" title="Hapus filter">
-                        <small><i class="ri-close-line"></i> Hapus filter</small>
-                    </a>
-                </small>
-            </div>
-        @endif
-    </div>
-
     <div class="row g-3">
         @forelse(($items ?? []) as $i => $it)
         <div class="col-12 col-md-6 col-lg-4">

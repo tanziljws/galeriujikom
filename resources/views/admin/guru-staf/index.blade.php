@@ -20,39 +20,6 @@
 @endif
 
 <div class="card-elevated p-3">
-    <!-- Filter Form -->
-    <div class="mb-4">
-        <form action="{{ route('admin.guru-staf.index') }}" method="GET" class="row g-3">
-            <div class="col-md-12">
-                <select name="type" class="form-select" onchange="this.form.submit()" aria-label="Filter berdasarkan tipe">
-                    <option value="">Semua Tipe</option>
-                    <option value="guru" {{ request('type') == 'guru' ? 'selected' : '' }}>Guru</option>
-                    <option value="staf" {{ request('type') == 'staf' ? 'selected' : '' }}>Staf</option>
-                    <option value="kepala-sekolah" {{ request('type') == 'kepala-sekolah' ? 'selected' : '' }}>Kepala Sekolah</option>
-                </select>
-            </div>
-        </form>
-        
-        @if(request('type'))
-            <div class="mt-2">
-                <small class="text-muted">
-                    Menampilkan: 
-                    @if(request('type'))
-                        <span class="badge bg-secondary ms-1">
-                            <i class="ri-filter-line me-1"></i>
-                            @if(request('type') == 'guru') Guru
-                            @elseif(request('type') == 'staf') Staf
-                            @elseif(request('type') == 'kepala-sekolah') Kepala Sekolah
-                            @endif
-                        </span>
-                    @endif
-                    <a href="{{ route('admin.guru-staf.index') }}" class="text-danger ms-2" title="Hapus filter">
-                        <small><i class="ri-close-line"></i> Hapus filter</small>
-                    </a>
-                </small>
-            </div>
-        @endif
-    </div>
 
     <div class="row g-3">
         @forelse(($items ?? []) as $i => $it)
