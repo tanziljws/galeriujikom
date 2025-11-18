@@ -127,45 +127,28 @@ class GalleryCategoryController extends Controller
         try {
             $umbrellaCategories = $this->getUmbrellaCategories();
             
-            // Handle both flat array and nested structure
-            $allCategories = [];
+            // Handle both flat array and nested structure - same logic as GalleryController
+            $categories = [];
             if (is_array($umbrellaCategories)) {
                 // Check if it's an associative array (object) or indexed array
                 if (array_keys($umbrellaCategories) !== range(0, count($umbrellaCategories) - 1)) {
                     // It's an object/associative array (umbrella categories structure)
-                    // Get all subcategories
-                    foreach ($umbrellaCategories as $umbrella => $subcats) {
-                        if (is_array($subcats)) {
-                            $allCategories = array_merge($allCategories, $subcats);
-                        }
-                    }
+                    // Only show umbrella categories (keys), not subcategories - same as user filter
+                    $categories = array_keys($umbrellaCategories);
                 } else {
                     // It's a flat indexed array
-                    $allCategories = $umbrellaCategories;
+                    $categories = $umbrellaCategories;
                 }
             }
             
-            // Count photos per category from DB
+            // Count photos per category from DB (only for umbrella categories shown to users)
             $photosByCategory = [];
-            // Count for umbrella categories (keys)
-            if (is_array($umbrellaCategories) && array_keys($umbrellaCategories) !== range(0, count($umbrellaCategories) - 1)) {
-                foreach (array_keys($umbrellaCategories) as $umbrella) {
-                    $photosByCategory[$umbrella] = GalleryItem::where('category', $umbrella)->count();
-                }
-                // Also count for subcategories
-                foreach ($allCategories as $subcat) {
-                    if (!isset($photosByCategory[$subcat])) {
-                        $photosByCategory[$subcat] = GalleryItem::where('category', $subcat)->count();
-                    }
-                }
-            } else {
-                foreach ($allCategories as $category) {
-                    $photosByCategory[$category] = GalleryItem::where('category', $category)->count();
-                }
+            foreach ($categories as $category) {
+                $photosByCategory[$category] = GalleryItem::where('category', $category)->count();
             }
             
             return view('admin.gallery.categories', [
-                'categories' => $allCategories,
+                'categories' => $categories,
                 'umbrellaCategories' => $umbrellaCategories,
                 'photosByCategory' => $photosByCategory
             ]);

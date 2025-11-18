@@ -19,28 +19,10 @@
       <div class="alert alert-success mb-3">{{ session('status') }}</div>
     @endif
 
-    <!-- Search and Filter Form -->
+    <!-- Filter Form -->
     <div class="mb-4">
         <form action="{{ route('admin.agendas.index') }}" method="GET" class="row g-3">
-            <div class="col-md-8">
-                <div class="input-group">
-                    <input type="text" 
-                           name="search" 
-                           class="form-control" 
-                           placeholder="Cari agenda berdasarkan judul, tempat, atau deskripsi..." 
-                           value="{{ request('search') }}"
-                           aria-label="Cari agenda">
-                    <button class="btn btn-primary" type="submit">
-                        <i class="ri-search-line me-1"></i> Cari
-                    </button>
-                    @if(request('search') || request('month'))
-                        <a href="{{ route('admin.agendas.index') }}" class="btn btn-outline-secondary" title="Hapus semua filter">
-                            <i class="ri-close-line"></i>
-                        </a>
-                    @endif
-                </div>
-            </div>
-            <div class="col-md-4">
+            <div class="col-md-12">
                 <select name="month" class="form-select" onchange="this.form.submit()" aria-label="Filter berdasarkan bulan">
                     <option value="">Semua Bulan</option>
                     @php
@@ -59,21 +41,16 @@
             </div>
         </form>
         
-        @if(request('search') || request('month'))
+        @if(request('month'))
             <div class="mt-2">
                 <small class="text-muted">
-                    Menampilkan hasil untuk: 
-                    @if(request('search'))
-                        <span class="badge bg-primary">
-                            <i class="ri-search-line me-1"></i>{{ request('search') }}
-                        </span>
-                    @endif
+                    Menampilkan: 
                     @if(request('month'))
                         <span class="badge bg-secondary ms-1">
                             <i class="ri-calendar-line me-1"></i>{{ $months[request('month')] ?? 'Bulan ' . request('month') }}
                         </span>
                     @endif
-                    <a href="{{ route('admin.agendas.index') }}" class="text-danger ms-2" title="Hapus semua filter">
+                    <a href="{{ route('admin.agendas.index') }}" class="text-danger ms-2" title="Hapus filter">
                         <small><i class="ri-close-line"></i> Hapus filter</small>
                     </a>
                 </small>
