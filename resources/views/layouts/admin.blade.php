@@ -189,7 +189,7 @@
     document.querySelectorAll('.admin-menu a').forEach(el=>{
         el.addEventListener('mouseenter',()=>{
             if (el.animate) {
-                el.animate({ transform: ['translateX(0)','translateX(4px)']}, {duration:200, fill:'forwards', easing:'ease-out'});
+            el.animate({ transform: ['translateX(0)','translateX(4px)']}, {duration:200, fill:'forwards', easing:'ease-out'});
             } else {
                 el.style.transform = 'translateX(4px)';
                 el.style.transition = 'transform 0.2s ease-out';
@@ -197,7 +197,7 @@
         });
         el.addEventListener('mouseleave',()=>{
             if (el.animate) {
-                el.animate({ transform: ['translateX(4px)','translateX(0)']}, {duration:200, fill:'forwards', easing:'ease-in'});
+            el.animate({ transform: ['translateX(4px)','translateX(0)']}, {duration:200, fill:'forwards', easing:'ease-in'});
             } else {
                 el.style.transform = 'translateX(0)';
                 el.style.transition = 'transform 0.2s ease-in';

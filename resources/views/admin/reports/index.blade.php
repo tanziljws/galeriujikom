@@ -45,7 +45,7 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="text-muted mb-1">Total Dislikes</h6>
-              <h3 class="mb-0">{{ !empty($photoReports) ? array_sum(array_column(array_column($photoReports, 'stats'), 'dislikes')) : 0 }}</h3>
+              <h3 class="mb-0">{{ $totalDislikes ?? 0 }}</h3>
             </div>
           </div>
         </div>
@@ -63,7 +63,7 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="text-muted mb-1">Total Foto</h6>
-              <h3 class="mb-0">{{ count($photoReports ?? []) }}</h3>
+              <h3 class="mb-0">{{ $totalPhotos ?? 0 }}</h3>
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="text-muted mb-1">Total Likes</h6>
-              <h3 class="mb-0">{{ !empty($photoReports) ? array_sum(array_column(array_column($photoReports, 'stats'), 'likes')) : 0 }}</h3>
+              <h3 class="mb-0">{{ $totalLikes ?? 0 }}</h3>
             </div>
           </div>
         </div>
@@ -99,7 +99,7 @@
             </div>
             <div class="flex-grow-1 ms-3">
               <h6 class="text-muted mb-1">Total Unduhan</h6>
-              <h3 class="mb-0">{{ !empty($photoReports) ? array_sum(array_column(array_column($photoReports, 'stats'), 'downloads')) : 0 }}</h3>
+              <h3 class="mb-0">{{ $totalDownloads ?? 0 }}</h3>
             </div>
           </div>
         </div>
